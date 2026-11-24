@@ -74,7 +74,6 @@
     <!-- ==================== TAB 1: HOME ==================== -->
     <section id="tab-home" class="tab-section space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Left 4 Cols: My Character & Wallet -->
         <div class="lg:col-span-4 bg-white rounded-2xl border border-zinc-200/90 p-6 flex flex-col items-center text-center justify-between">
           <div class="w-full flex items-center justify-between text-xs text-zinc-400">
             <span id="homeRoleBadge" class="font-semibold text-zinc-600">학생 프로필</span>
@@ -107,7 +106,6 @@
           </button>
         </div>
 
-        <!-- Right 8 Cols: Morning News + Go to Invest + Today's Missions -->
         <div class="lg:col-span-8 flex flex-col gap-5">
           <div class="bg-white rounded-2xl border border-zinc-200/90 p-6 flex flex-col justify-between">
             <div>
@@ -146,7 +144,6 @@
         </div>
       </div>
 
-      <!-- Teacher/Admin Quick Payroll Strip -->
       <div id="teacherQuickBar" class="bg-white rounded-2xl border border-zinc-200/90 p-5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-6">
           <div>
@@ -174,20 +171,29 @@
     <section id="tab-metaverse" class="tab-section hidden space-y-4">
       <div class="bg-white p-4 rounded-2xl border border-zinc-200/90 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="font-extrabold text-sm text-zinc-900">3D 교실 광장 (기본 30석 · 아바타 연동)</h2>
-          <p class="text-xs text-zinc-500">방향키(WASD) 또는 바닥 클릭으로 이동 · 의자 근처에서 <b>앉기/일어서기(E)</b></p>
+          <h2 class="font-extrabold text-sm text-zinc-900">3D 교실 광장 (30석 · 화이트보드 · 태극기 · 교사석 · TV · 사물함)</h2>
+          <p class="text-xs text-zinc-500"><b>WASD/방향키</b> 이동(앞·뒤·옆 방향 전환) · <b>E키</b> 앉기 · <b>H키</b> 인사하기 · <b>마우스 드래그/휠</b> 시점·줌 조절</p>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="toggleSitStand()" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition">
-            <span id="sitStandText">가까운 의자에 앉기 (E)</span>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button onclick="triggerWaveGreeting()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition flex items-center gap-1">
+            👋 인사하기 (H)
           </button>
-          <button onclick="resetCameraView()" class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold">시점 초기화</button>
+          <button onclick="toggleSitStand()" class="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition">
+            <span id="sitStandText">의자 앉기 (E)</span>
+          </button>
+          <div class="flex items-center bg-zinc-100 rounded-xl p-0.5">
+            <button onclick="adjustCameraZoom(-1.8)" title="줌 인" class="px-2 py-1.5 hover:bg-white rounded-lg text-xs font-bold">+</button>
+            <button onclick="adjustCameraZoom(1.8)" title="줌 아웃" class="px-2 py-1.5 hover:bg-white rounded-lg text-xs font-bold">-</button>
+            <button onclick="adjustCameraPitch(-0.12)" title="시점 낮추기" class="px-2 py-1.5 hover:bg-white rounded-lg text-xs font-bold">↓</button>
+            <button onclick="adjustCameraPitch(0.12)" title="시점 높이기" class="px-2 py-1.5 hover:bg-white rounded-lg text-xs font-bold">↑</button>
+          </div>
+          <button onclick="resetCameraView()" class="px-2.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold">시점 초기화</button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div class="lg:col-span-3 bg-zinc-900 rounded-2xl p-1.5 relative">
-          <div id="threeContainer" class="w-full h-[520px] relative overflow-hidden"></div>
+          <div id="threeContainer" class="w-full h-[540px] relative overflow-hidden"></div>
           <div id="metaverseStatusOverlay" class="absolute top-4 left-4 bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-800 shadow-xs">
             교실 산책 중
           </div>
@@ -203,8 +209,8 @@
             <div id="metaverseRoster" class="space-y-2 max-h-80 overflow-y-auto custom-scroll"></div>
           </div>
           <div class="text-[11px] text-zinc-400 pt-3 border-t border-zinc-100 space-y-1">
-            <div>• 총 30개의 책상·의자가 배치되어 있습니다.</div>
-            <div>• 상점에서 꾸민 도트 아바타가 3D 교실에 그대로 나타납니다.</div>
+            <div>• 책상 충돌 판정이 적용되어 책상 사이 통로로 이동합니다.</div>
+            <div>• 마우스 드래그로 상하좌우 각도, 휠로 줌인/줌아웃이 가능합니다.</div>
           </div>
         </div>
       </div>
@@ -273,7 +279,7 @@
         <button onclick="switchManageSubTab('payroll')" data-sub="payroll" class="sub-btn bg-zinc-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition">급여 지급 · 거래내역</button>
         <button onclick="switchManageSubTab('students')" data-sub="students" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">학생 명단 · 엑셀 등록</button>
         <button onclick="switchManageSubTab('jobs')" data-sub="jobs" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">직업 설정 (30종+)</button>
-        <button onclick="switchManageSubTab('seating')" data-sub="seating" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">자리 배치도</button>
+        <button onclick="switchManageSubTab('seating')" data-sub="seating" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">자리 배치도 (30석)</button>
       </div>
 
       <!-- Sub 1: Payroll & Logs -->
@@ -363,25 +369,24 @@
         <div id="jobsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3.5"></div>
       </div>
 
-      <!-- Sub 4: Seating Chart -->
+      <!-- Sub 4: Seating Chart (30 Seats Default) -->
       <div id="sub-seating" class="sub-section hidden space-y-4">
         <div class="bg-white p-5 rounded-2xl border border-zinc-200/90 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 class="font-bold text-sm text-zinc-900">교실 자리 배치도 (기본 6열 × 5행 = 30석)</h3>
+            <h3 class="font-bold text-sm text-zinc-900">교실 자리 배치도 (기본 30석)</h3>
             <p class="text-xs text-zinc-400">카드를 클릭하거나 드래그하여 자리를 맞바꾸세요.</p>
           </div>
           <div class="flex items-center gap-2">
             <select id="seatColsSelect" onchange="changeSeatCols(this.value)" class="border border-zinc-200 rounded-xl px-2.5 py-1.5 text-xs font-bold">
-              <option value="4">4열</option>
-              <option value="5">5열</option>
-              <option value="6" selected>6열</option>
+              <option value="5">5열 (5×6=30석)</option>
+              <option value="6" selected>6열 (6×5=30석)</option>
             </select>
             <button onclick="sortSeatsByNumber()" class="px-3 py-1.5 rounded-xl bg-zinc-100 text-xs font-bold">번호순</button>
             <button onclick="shuffleSeats()" class="px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-xs font-bold">랜덤 배치</button>
           </div>
         </div>
         <div class="bg-white p-6 rounded-2xl border border-zinc-200/90">
-          <div class="max-w-sm mx-auto mb-8 py-2 bg-zinc-800 text-white text-center font-bold text-xs rounded-lg">칠 판</div>
+          <div class="max-w-md mx-auto mb-8 py-2 bg-zinc-100 border-2 border-zinc-400 text-zinc-800 text-center font-bold text-xs rounded-lg">화이트보드</div>
           <div id="seatingGrid" class="grid grid-cols-2 sm:grid-cols-6 gap-3 max-w-4xl mx-auto"></div>
         </div>
       </div>
@@ -394,8 +399,8 @@
   </div>
 
   <script>
-    // ==================== PIXEL AVATAR RENDERER ====================
-    function drawMaplePixelAvatar(canvas, equipped = {}, isSitting = false) {
+    // ==================== PIXEL AVATAR RENDERER (2D STUDIO & HOME) ====================
+    function drawMaplePixelAvatar(canvas, equipped = {}) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -407,46 +412,31 @@
       };
 
       const shirtColor = equipped.shirtColor || '#881337';
-      const shirtHighlight = equipped.shirtColor === '#eab308' ? '#fde047' : (equipped.shirtColor === '#1e3a8a' ? '#3b82f6' : '#be123c');
-      const hasGlasses = equipped.glasses !== '';
+      const shirtHighlight = equipped.shirtColor === '#eab308' ? '#fde047' : (equipped.shirtColor === '#1e3a8a' ? '#3b82f6' : (equipped.shirtColor === '#065f46' ? '#10b981' : '#be123c'));
+      const hasGlasses = !!(equipped.glasses && equipped.glasses !== '');
       const hatType = equipped.hat || '';
-      const hasPet = equipped.pet !== '';
+      const hasPet = !!(equipped.pet && equipped.pet !== '');
 
-      // Ground Shadow
-      px(9, 37, 14, 2, 'rgba(0,0,0,0.14)');
+      px(9, 37, 14, 2, 'rgba(0,0,0,0.12)');
+      px(10, 35, 5, 2, '#18181b');
+      px(17, 35, 5, 2, '#18181b');
+      px(10, 34, 5, 2, '#ffffff');
+      px(17, 34, 5, 2, '#ffffff');
+      px(11, 29, 4, 5, '#27272a');
+      px(17, 29, 4, 5, '#27272a');
 
-      // Legs & Shoes (adjust height slightly if sitting)
-      if (isSitting) {
-        px(10, 32, 5, 2, '#18181b');
-        px(17, 32, 5, 2, '#18181b');
-        px(10, 31, 5, 2, '#ffffff');
-        px(17, 31, 5, 2, '#ffffff');
-        px(11, 28, 4, 3, '#27272a');
-        px(17, 28, 4, 3, '#27272a');
-      } else {
-        px(10, 35, 5, 2, '#18181b');
-        px(17, 35, 5, 2, '#18181b');
-        px(10, 34, 5, 2, '#ffffff');
-        px(17, 34, 5, 2, '#ffffff');
-        px(11, 29, 4, 5, '#27272a');
-        px(17, 29, 4, 5, '#27272a');
-      }
-
-      // Jersey Torso
       px(10, 21, 12, 8, '#18181b');
       px(11, 21, 10, 8, shirtColor);
       px(12, 22, 8, 6, shirtHighlight);
       px(15, 21, 1, 8, '#ffffff');
       px(11, 24, 10, 1, 'rgba(255,255,255,0.65)');
 
-      // Arms & Hands
       px(8, 22, 3, 6, shirtColor);
       px(21, 22, 3, 6, shirtColor);
       px(8, 27, 2, 3, '#fde68a');
       px(22, 27, 2, 3, '#fde68a');
       px(21, 26, 3, 1, '#ffffff');
 
-      // Head Base
       px(8, 6, 16, 14, '#18181b');
       px(9, 7, 14, 12, '#fef3c7');
       px(10, 18, 12, 1, '#fde68a');
@@ -455,7 +445,6 @@
       px(8, 13, 1, 3, '#fde68a');
       px(23, 13, 1, 3, '#fde68a');
 
-      // Black Parted Hair
       px(8, 4, 16, 5, '#18181b');
       px(7, 6, 18, 6, '#18181b');
       px(9, 5, 14, 3, '#27272a');
@@ -464,7 +453,6 @@
       px(17, 9, 2, 2, '#18181b');
       px(21, 10, 3, 3, '#18181b');
 
-      // Eyes & Blush
       px(10, 11, 3, 1, '#18181b');
       px(19, 11, 3, 1, '#18181b');
       px(10, 13, 3, 3, '#27272a');
@@ -475,7 +463,6 @@
       px(21, 16, 2, 1, '#fca5a5');
       px(15, 17, 2, 1, '#78350f');
 
-      // Round Wire Glasses
       if (hasGlasses) {
         px(9, 12, 5, 1, '#3f3f46');
         px(9, 16, 5, 1, '#3f3f46');
@@ -488,7 +475,6 @@
         px(22, 12, 1, 5, '#3f3f46');
       }
 
-      // Hat
       if (hatType === '👑') {
         px(11, 1, 10, 3, '#facc15');
         px(11, 0, 2, 1, '#facc15');
@@ -498,9 +484,10 @@
       } else if (hatType === '🧢') {
         px(9, 3, 14, 3, '#2563eb');
         px(14, 5, 11, 1, '#1d4ed8');
+      } else if (hatType) {
+        px(10, 2, 12, 3, '#ec4899');
       }
 
-      // Cute Grey Cat Doll Pet
       if (hasPet) {
         px(23, 29, 7, 7, '#18181b');
         px(24, 30, 5, 5, '#71717a');
@@ -517,7 +504,7 @@
       { id: 'j1', title: '은행원', salary: 1500, desc: '학급 화폐 입출금 및 급여 지급 보조' },
       { id: 'j2', title: '학급 회장', salary: 1600, desc: '학급 회의 진행 및 선생님 전달 사항 안내' },
       { id: 'j3', title: '학급 부회장', salary: 1400, desc: '학급 회장 보좌 및 줄 세우기 질서 지도' },
-      { id: 'j4', title: '칠판 지킴이', salary: 1100, desc: '수업 종료 후 칠판 지우기 및 분필 정리' },
+      { id: 'j4', title: '칠판 지킴이', salary: 1100, desc: '수업 종료 후 화이트보드 지우기 및 보드마카 정리' },
       { id: 'j5', title: '에너지 보안관', salary: 1100, desc: '이동 수업 시 전등, 에어컨, TV 전원 끄기' },
       { id: 'j6', title: '우유 급식 도우미', salary: 1200, desc: '아침 우유 배부 및 빈 우유팩 분리수거' },
       { id: 'j7', title: '점심 급식 도우미', salary: 1300, desc: '급식실 질서 유지 및 잔반 줄이기 캠페인' },
@@ -526,7 +513,7 @@
       { id: 'j10', title: '스마트기기 관리자', salary: 1300, desc: '태블릿 PC 충전함 정리 및 번호 확인' },
       { id: 'j11', title: '환기·청정 관리자', salary: 1100, desc: '쉬는 시간 창문 환기 및 공기청정기 가동 확인' },
       { id: 'j12', title: '분리수거 대장', salary: 1300, desc: '종이, 플라스틱, 일반 쓰레기 분리배출 점검' },
-      { id: 'j13', title: '알림장 비서', salary: 1200, desc: '칠판 알림장 작성 및 가정통신문 배부' },
+      { id: 'j13', title: '알림장 비서', salary: 1200, desc: '보드 알림장 작성 및 가정통신문 배부' },
       { id: 'j14', title: '보건 도우미', salary: 1100, desc: '아픈 친구 보건실 동행 및 구급함 관리' },
       { id: 'j15', title: '미소 칭찬 기자', salary: 1200, desc: '우리 반 선행 사례 발굴 및 칭찬 게시판 기록' },
       { id: 'j16', title: '식물 정원사', salary: 1100, desc: '교실 화분 물주기 및 잎사귀 돌보기' },
@@ -538,10 +525,10 @@
       { id: 'j22', title: '국세청 직원', salary: 1400, desc: '학급 세금 징수 및 공공요금 관리 보조' },
       { id: 'j23', title: '시간 알림이', salary: 1100, desc: '수업 시작 1분 전 착석 안내 및 타이머 관리' },
       { id: 'j24', title: '사물함 정돈 반장', salary: 1100, desc: '하교 전 사물함 문 닫기 및 주변 정돈 점검' },
-      { id: 'j25', title: '외국어 도우미', salary: 1200, desc: '오늘의 영어 한 문장 칠판 게시 및 발음 안내' },
+      { id: 'j25', title: '외국어 도우미', salary: 1200, desc: '오늘의 영어 한 문장 게시 및 발음 안내' },
       { id: 'j26', title: '생일 파티 플래너', salary: 1200, desc: '이달의 생일 친구 축하 카드 준비 및 진행' },
       { id: 'j27', title: '통계 조사관', salary: 1200, desc: '학급 설문조사 집계 및 투표 개표 진행' },
-      { id: 'j28', title: '칠판 아티스트', salary: 1100, desc: '행사 및 계절에 맞춘 칠판 꾸미기 담당' },
+      { id: 'j28', title: '보드 아티스트', salary: 1100, desc: '행사 및 계절에 맞춘 게시판 꾸미기 담당' },
       { id: 'j29', title: '신발장 지킴이', salary: 1100, desc: '실내화장 정리 정돈 상태 확인' },
       { id: 'j30', title: '인턴 수습사원', salary: 800, desc: '새로운 직업을 탐색하며 학급 일손 돕기' }
     ];
@@ -592,14 +579,14 @@
             { id: 'coin', name: '디지털 코인', price: 400, prevPrice: 400, risk: '초고위험 자산', caution: '가격 변동폭이 매우 큽니다. 큰 수익이 날 수도 있지만 원금의 절반 이상을 잃을 수 있으므로 신중해야 합니다.' }
           ],
           students: [
-            { id: 's1', num: 1, name: '김민준', jobId: 'j1', isAdmin: true, balance: 3500, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: ['item-glass1', 'item-pet1'], equipped: { hat: '', glasses: '👓', shirtColor: '#881337', pet: '🐱' }, x: -5.0, z: -2.2, isSitting: false, chat: '' },
-            { id: 's2', num: 2, name: '이서윤', jobId: 'j2', isAdmin: false, balance: 3200, portfolio: { gold: 0, stock: 3, bond: 2, coin: 1 }, inventory: ['item-hat1'], equipped: { hat: '👑', glasses: '👓', shirtColor: '#1e3a8a', pet: '' }, x: -3.0, z: -2.2, isSitting: false, chat: '' },
-            { id: 's3', num: 3, name: '박도윤', jobId: 'j9', isAdmin: false, balance: 2800, portfolio: { gold: 1, stock: 1, bond: 0, coin: 2 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#065f46', pet: '' }, x: -1.0, z: -2.2, isSitting: false, chat: '' },
-            { id: 's4', num: 4, name: '최지우', jobId: 'j21', isAdmin: false, balance: 3100, portfolio: { gold: 2, stock: 0, bond: 3, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '👓', shirtColor: '#92400e', pet: '' }, x: 1.0, z: -2.2, isSitting: false, chat: '' },
-            { id: 's5', num: 5, name: '정예준', jobId: 'j10', isAdmin: false, balance: 2600, portfolio: { gold: 0, stock: 2, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#4c1d95', pet: '' }, x: 3.0, z: -2.2, isSitting: false, chat: '' },
-            { id: 's6', num: 6, name: '강하은', jobId: 'j8', isAdmin: false, balance: 2900, portfolio: { gold: 1, stock: 1, bond: 2, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#831843', pet: '🐱' }, x: 5.0, z: -2.2, isSitting: false, chat: '' },
-            { id: 's7', num: 7, name: '조시우', jobId: 'j12', isAdmin: false, balance: 2500, portfolio: { gold: 0, stock: 1, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#1e40af', pet: '' }, x: -5.0, z: -0.2, isSitting: false, chat: '' },
-            { id: 's8', num: 8, name: '윤서아', jobId: 'j15', isAdmin: false, balance: 3000, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#115e59', pet: '' }, x: -3.0, z: -0.2, isSitting: false, chat: '' }
+            { id: 's1', num: 1, name: '김민준', jobId: 'j1', isAdmin: true, balance: 3500, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: ['item-glass1', 'item-pet1'], equipped: { hat: '', glasses: '👓', shirtColor: '#881337', pet: '🐱' }, x: -4.4, z: -2.4, rotY: 0, isSitting: false, chat: '' },
+            { id: 's2', num: 2, name: '이서윤', jobId: 'j2', isAdmin: false, balance: 3200, portfolio: { gold: 0, stock: 3, bond: 2, coin: 1 }, inventory: ['item-hat1'], equipped: { hat: '👑', glasses: '👓', shirtColor: '#1e3a8a', pet: '' }, x: -2.2, z: -2.4, rotY: 0, isSitting: false, chat: '' },
+            { id: 's3', num: 3, name: '박도윤', jobId: 'j9', isAdmin: false, balance: 2800, portfolio: { gold: 1, stock: 1, bond: 0, coin: 2 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#065f46', pet: '' }, x: 0.0, z: -2.4, rotY: 0, isSitting: false, chat: '' },
+            { id: 's4', num: 4, name: '최지우', jobId: 'j21', isAdmin: false, balance: 3100, portfolio: { gold: 2, stock: 0, bond: 3, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '👓', shirtColor: '#92400e', pet: '' }, x: 2.2, z: -2.4, rotY: 0, isSitting: false, chat: '' },
+            { id: 's5', num: 5, name: '정예준', jobId: 'j10', isAdmin: false, balance: 2600, portfolio: { gold: 0, stock: 2, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#4c1d95', pet: '' }, x: 4.4, z: -2.4, rotY: 0, isSitting: false, chat: '' },
+            { id: 's6', num: 6, name: '강하은', jobId: 'j8', isAdmin: false, balance: 2900, portfolio: { gold: 1, stock: 1, bond: 2, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#831843', pet: '🐱' }, x: -4.4, z: 1.6, rotY: 0, isSitting: false, chat: '' },
+            { id: 's7', num: 7, name: '조시우', jobId: 'j12', isAdmin: false, balance: 2500, portfolio: { gold: 0, stock: 1, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#1e40af', pet: '' }, x: -2.2, z: 1.6, rotY: 0, isSitting: false, chat: '' },
+            { id: 's8', num: 8, name: '윤서아', jobId: 'j15', isAdmin: false, balance: 3000, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#115e59', pet: '' }, x: 0.0, z: 1.6, rotY: 0, isSitting: false, chat: '' }
           ],
           shopItems: [
             { id: 'item-snack1', category: '간식', name: '달콤 마이쮸 2개 교환권', price: 800, icon: '🍬', type: 'consumable' },
@@ -626,16 +613,16 @@
       ]
     };
 
-    function saveState() { try { localStorage.setItem('classFinanceMinimal_v3', JSON.stringify(state)); } catch (e) {} }
+    function saveState() { try { localStorage.setItem('classFinanceMinimal_v4', JSON.stringify(state)); } catch (e) {} }
     function loadState() {
       try {
-        const saved = localStorage.getItem('classFinanceMinimal_v3');
+        const saved = localStorage.getItem('classFinanceMinimal_v4');
         if (saved) state = JSON.parse(saved);
       } catch (e) {}
     }
     function resetAllDemoData() {
       if (!confirm('초기 데모 데이터로 되돌릴까요?')) return;
-      localStorage.removeItem('classFinanceMinimal_v3');
+      localStorage.removeItem('classFinanceMinimal_v4');
       location.reload();
     }
     function getCurrentClass() { return state.classes.find(c => c.id === state.activeClassId) || state.classes[0]; }
@@ -692,7 +679,10 @@
       state.activeUserId = userId;
       saveState();
       renderAll();
-      if (threeScene) updateMetaverseRoster();
+      if (threeScene) {
+        updateMetaverseRoster();
+        updateSitButtonUI();
+      }
     }
 
     function switchTab(tabId) {
@@ -761,7 +751,7 @@
         jobs: JSON.parse(JSON.stringify(DEFAULT_30_JOBS)),
         assets: JSON.parse(JSON.stringify(base.assets)),
         students: [
-          { id: 's-' + Date.now(), num: 1, name: '홍길동', jobId: 'j1', isAdmin: true, balance: 2000, portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: ['item-glass1', 'item-pet1'], equipped: { hat: '', glasses: '👓', shirtColor: '#881337', pet: '🐱' }, x: -2, z: -1, isSitting: false, chat: '' }
+          { id: 's-' + Date.now(), num: 1, name: '홍길동', jobId: 'j1', isAdmin: true, balance: 2000, portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: ['item-glass1', 'item-pet1'], equipped: { hat: '', glasses: '👓', shirtColor: '#881337', pet: '🐱' }, x: -2.2, z: -2.4, rotY: 0, isSitting: false, chat: '' }
         ],
         shopItems: JSON.parse(JSON.stringify(base.shopItems)),
         missions: JSON.parse(JSON.stringify(base.missions)),
@@ -789,7 +779,7 @@
         document.getElementById('homeStudentJob').textContent = job ? `${job.title} · ${job.desc}` : '직업 미배정';
         document.getElementById('homeBalance').textContent = `${st.balance.toLocaleString()} ${cls.currency}`;
         document.getElementById('homeSalary').textContent = `${job ? job.salary.toLocaleString() : 0} ${cls.currency}`;
-        drawMaplePixelAvatar(document.getElementById('homeAvatarCanvas'), st.equipped, false);
+        drawMaplePixelAvatar(document.getElementById('homeAvatarCanvas'), st.equipped);
       }
 
       const news = NEWS_SCENARIOS[cls.newsIndex % NEWS_SCENARIOS.length];
@@ -845,29 +835,124 @@
       document.getElementById('payAllBtn').disabled = !isMgr;
     }
 
-    // ==================== 3D METAVERSE CLASSROOM (30 DESKS + PIXEL AVATAR + WINDOWS) ====================
+    // ==================== 3D METAVERSE CLASSROOM (FULL 3D CHIBI AVATARS, COLLISION, WHITEBOARD, TAEGEUKGI, TEACHER DESK+2 PCs+TV, LOCKERS) ====================
     let threeScene, threeCamera, threeRenderer;
     let studentMeshes = {};
     let chairPositions = [];
+    let colliders = []; // AABB bounding boxes { minX, maxX, minZ, maxZ }
     let keysPressed = {};
     let targetMovePos = null;
+    let camYaw = 0;
+    let camPitch = 0.58;
+    let camDist = 15.0;
+    let isDraggingCam = false;
+    let prevMouse = { x: 0, y: 0 };
 
-    function createAvatarTexture(equipped, isSitting) {
+    function updateCameraOrbit() {
+      if (!threeCamera) return;
+      const target = new THREE.Vector3(0, 0.9, -0.5);
+      const x = target.x + camDist * Math.sin(camYaw) * Math.cos(camPitch);
+      const y = target.y + camDist * Math.sin(camPitch);
+      const z = target.z + camDist * Math.cos(camYaw) * Math.cos(camPitch);
+      threeCamera.position.set(x, Math.max(1.8, y), z);
+      threeCamera.lookAt(target);
+    }
+
+    function adjustCameraZoom(delta) {
+      camDist = Math.max(5.5, Math.min(23, camDist + delta));
+      updateCameraOrbit();
+    }
+
+    function adjustCameraPitch(delta) {
+      camPitch = Math.max(0.18, Math.min(1.38, camPitch + delta));
+      updateCameraOrbit();
+    }
+
+    // Draw Taegeukgi (Korean National Flag) Canvas Texture
+    function createTaegeukgiTexture() {
       const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 160;
-      drawMaplePixelAvatar(canvas, equipped, isSitting);
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.magFilter = THREE.NearestFilter;
-      tex.minFilter = THREE.NearestFilter;
-      return tex;
+      canvas.width = 300;
+      canvas.height = 200;
+      const ctx = canvas.getContext('2d');
+
+      // White background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 300, 200);
+      ctx.strokeStyle = '#d4d4d8';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, 296, 196);
+
+      const cx = 150, cy = 100, r = 46;
+      // Red top half
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, Math.PI, 0, false);
+      ctx.fillStyle = '#cd2e3a';
+      ctx.fill();
+
+      // Blue bottom half
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI, false);
+      ctx.fillStyle = '#0047a0';
+      ctx.fill();
+
+      // Small red & blue swirl circles
+      ctx.beginPath();
+      ctx.arc(cx - r / 2, cy, r / 2, 0, Math.PI * 2);
+      ctx.fillStyle = '#cd2e3a';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cx + r / 2, cy, r / 2, 0, Math.PI * 2);
+      ctx.fillStyle = '#0047a0';
+      ctx.fill();
+
+      // 4 Trigrams (건곤감리)
+      const drawTrigram = (angle, bars) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#18181b';
+        bars.forEach((broken, idx) => {
+          const y = -74 - idx * 9;
+          if (!broken) {
+            ctx.fillRect(-18, y, 36, 5);
+          } else {
+            ctx.fillRect(-18, y, 16, 5);
+            ctx.fillRect(2, y, 16, 5);
+          }
+        });
+        ctx.restore();
+      };
+      drawTrigram(-Math.PI / 4, [false, false, false]); // 건
+      drawTrigram(Math.PI / 4, [true, false, true]);    // 감
+      drawTrigram(-3 * Math.PI / 4, [false, true, false]); // 리
+      drawTrigram(3 * Math.PI / 4, [true, true, true]); // 곤
+
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    // Draw Classroom TV Screen Texture
+    function createTVScreenTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 320, 180);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('우리반 경제·금융 보드', 160, 75);
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('오늘의 아침 미션 & 투자 브리핑', 160, 110);
+      return new THREE.CanvasTexture(canvas);
     }
 
     function createClassroomWindow(zPos) {
       const winGroup = new THREE.Group();
-
-      // Outer wooden/dark frame
       const frameMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46 });
+
       const topBar = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 2.7), frameMat);
       topBar.position.y = 0.9;
       winGroup.add(topBar);
@@ -884,11 +969,9 @@
       rightBar.position.z = 1.3;
       winGroup.add(rightBar);
 
-      // Center vertical mullion (창살)
       const midBar = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.8, 0.08), frameMat);
       winGroup.add(midBar);
 
-      // Sky-tinted Glass Pane
       const glassMat = new THREE.MeshStandardMaterial({
         color: 0xbae6fd,
         emissive: 0x7dd3fc,
@@ -915,9 +998,8 @@
       threeScene = new THREE.Scene();
       threeScene.background = new THREE.Color(0xe4e4e7);
 
-      threeCamera = new THREE.PerspectiveCamera(48, container.clientWidth / container.clientHeight, 0.1, 100);
-      threeCamera.position.set(0, 10.5, 13.0);
-      threeCamera.lookAt(0, 0.6, -0.5);
+      threeCamera = new THREE.PerspectiveCamera(46, container.clientWidth / container.clientHeight, 0.1, 100);
+      updateCameraOrbit();
 
       threeRenderer = new THREE.WebGLRenderer({ antialias: true });
       threeRenderer.setSize(container.clientWidth, container.clientHeight);
@@ -925,108 +1007,249 @@
       container.appendChild(threeRenderer.domElement);
 
       threeScene.add(new THREE.AmbientLight(0xffffff, 0.82));
-      const dirLight = new THREE.DirectionalLight(0xfffbeb, 0.55);
-      dirLight.position.set(-8, 12, 6);
+      const dirLight = new THREE.DirectionalLight(0xfffbeb, 0.6);
+      dirLight.position.set(-8, 14, 8);
       threeScene.add(dirLight);
 
-      // Expanded Classroom Floor (16 x 13.5 to comfortably fit 30 desks)
-      const floor = new THREE.Mesh(new THREE.BoxGeometry(16, 0.2, 13.5), new THREE.MeshStandardMaterial({ color: 0xd6b588 }));
+      // Floor (16m wide x 15m deep)
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(16, 0.2, 15), new THREE.MeshStandardMaterial({ color: 0xd6b588 }));
       floor.position.y = -0.1;
       floor.name = 'classroomFloor';
       threeScene.add(floor);
 
-      // Classroom Walls
+      // Front, Back, Left, Right Walls
       const wallMat = new THREE.MeshStandardMaterial({ color: 0xfafafa });
-      const backWall = new THREE.Mesh(new THREE.BoxGeometry(16, 4.2, 0.2), wallMat);
-      backWall.position.set(0, 2.1, -6.75);
+      const frontWall = new THREE.Mesh(new THREE.BoxGeometry(16, 4.5, 0.2), wallMat);
+      frontWall.position.set(0, 2.25, -7.5);
+      threeScene.add(frontWall);
+
+      const backWall = new THREE.Mesh(new THREE.BoxGeometry(16, 4.5, 0.2), wallMat);
+      backWall.position.set(0, 2.25, 7.5);
       threeScene.add(backWall);
 
-      const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.2, 13.5), wallMat);
-      leftWall.position.set(-8, 2.1, 0);
+      const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.5, 15), wallMat);
+      leftWall.position.set(-8, 2.25, 0);
       threeScene.add(leftWall);
 
-      const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.2, 13.5), wallMat);
-      rightWall.position.set(8, 2.1, 0);
+      const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.5, 15), wallMat);
+      rightWall.position.set(8, 2.25, 0);
       threeScene.add(rightWall);
 
-      // 3 Large Classroom Windows along the Left Wall
-      [-3.4, 0.2, 3.8].forEach(zPos => {
-        threeScene.add(createClassroomWindow(zPos));
+      // 3 Sunlit Classroom Windows on Left Wall
+      [-3.6, 0.0, 3.6].forEach(zPos => threeScene.add(createClassroomWindow(zPos)));
+
+      // ==================== FRONT WALL: WHITEBOARD + TAEGEUKGI + PODIUM + TEACHER STATION + TV ====================
+      // 1. Whiteboard (화이트보드)
+      const wbFrame = new THREE.Mesh(new THREE.BoxGeometry(6.2, 2.0, 0.14), new THREE.MeshStandardMaterial({ color: 0x71717a }));
+      wbFrame.position.set(-0.6, 2.1, -7.35);
+      threeScene.add(wbFrame);
+
+      const whiteboard = new THREE.Mesh(new THREE.BoxGeometry(5.9, 1.78, 0.16), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+      whiteboard.position.set(-0.6, 2.1, -7.32);
+      threeScene.add(whiteboard);
+
+      // Whiteboard marker tray
+      const wbTray = new THREE.Mesh(new THREE.BoxGeometry(5.9, 0.06, 0.18), new THREE.MeshStandardMaterial({ color: 0xa1a1aa }));
+      wbTray.position.set(-0.6, 1.18, -7.25);
+      threeScene.add(wbTray);
+
+      // 2. Taegeukgi (태극기) above the Whiteboard
+      const flagFrame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.02, 0.08), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      flagFrame.position.set(-0.6, 3.72, -7.36);
+      threeScene.add(flagFrame);
+
+      const flagMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.38, 0.92),
+        new THREE.MeshBasicMaterial({ map: createTaegeukgiTexture() })
+      );
+      flagMesh.position.set(-0.6, 3.72, -7.31);
+      threeScene.add(flagMesh);
+
+      // 3. Podium (교탁)
+      colliders = [];
+      const podium = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.0, 0.75), new THREE.MeshStandardMaterial({ color: 0x92400e }));
+      podium.position.set(-0.6, 0.5, -5.8);
+      threeScene.add(podium);
+      colliders.push({ minX: -1.45, maxX: 0.25, minZ: -6.35, maxZ: -5.25 });
+
+      // 4. Teacher's Desk, Chair, 2 Computers & Student-Facing Wall TV beside Podium
+      const tDeskX = 3.8, tDeskZ = -5.8;
+      const tDeskTop = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      tDeskTop.position.set(tDeskX, 0.78, tDeskZ);
+      threeScene.add(tDeskTop);
+
+      const tDeskBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.74, 0.95), new THREE.MeshStandardMaterial({ color: 0x92400e }));
+      tDeskBody.position.set(tDeskX, 0.37, tDeskZ);
+      threeScene.add(tDeskBody);
+      colliders.push({ minX: tDeskX - 1.4, maxX: tDeskX + 1.4, minZ: tDeskZ - 0.75, maxZ: tDeskZ + 0.75 });
+
+      // Teacher's Chair behind teacher desk
+      const tChairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.08, 0.65), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+      tChairSeat.position.set(tDeskX, 0.45, tDeskZ - 0.75);
+      threeScene.add(tChairSeat);
+      const tChairBack = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.65, 0.08), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+      tChairBack.position.set(tDeskX, 0.78, tDeskZ - 1.05);
+      threeScene.add(tChairBack);
+
+      // 2 Computers (Monitors + Stands + Keyboards) on Teacher's Desk
+      [-0.58, 0.58].forEach(offsetX => {
+        const monStand = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.18, 0.12), new THREE.MeshStandardMaterial({ color: 0x27272a }));
+        monStand.position.set(tDeskX + offsetX, 0.92, tDeskZ - 0.15);
+        threeScene.add(monStand);
+
+        const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.48, 0.06), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+        monitor.position.set(tDeskX + offsetX, 1.18, tDeskZ - 0.15);
+        threeScene.add(monitor);
+
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.68, 0.42), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+        screen.position.set(tDeskX + offsetX, 1.18, tDeskZ - 0.11);
+        threeScene.add(screen);
+
+        const kb = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.03, 0.18), new THREE.MeshStandardMaterial({ color: 0x3f3f46 }));
+        kb.position.set(tDeskX + offsetX, 0.85, tDeskZ + 0.18);
+        threeScene.add(kb);
       });
 
-      // Blackboard & Teacher's Podium
-      const boardFrame = new THREE.Mesh(new THREE.BoxGeometry(7.2, 2.2, 0.15), new THREE.MeshStandardMaterial({ color: 0x52525b }));
-      boardFrame.position.set(0, 2.3, -6.6);
-      threeScene.add(boardFrame);
+      // Large Classroom TV mounted above Teacher's Desk facing Students
+      const tvBezel = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.55, 0.14), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+      tvBezel.position.set(tDeskX, 2.55, -7.28);
+      threeScene.add(tvBezel);
 
-      const blackboard = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.9, 0.18), new THREE.MeshStandardMaterial({ color: 0x064e3b }));
-      blackboard.position.set(0, 2.3, -6.57);
-      threeScene.add(blackboard);
+      const tvScreen = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.44, 1.4),
+        new THREE.MeshBasicMaterial({ map: createTVScreenTexture() })
+      );
+      tvScreen.position.set(tDeskX, 2.55, -7.2);
+      threeScene.add(tvScreen);
 
-      const podium = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.0, 0.85), new THREE.MeshStandardMaterial({ color: 0x78350f }));
-      podium.position.set(0, 0.5, -5.2);
-      threeScene.add(podium);
+      // ==================== BACK WALL: STUDENT LOCKERS (교실 뒷편 사물함) ====================
+      const lockerGroup = new THREE.Group();
+      const lockerBodyMat = new THREE.MeshStandardMaterial({ color: 0xe4e4e7 });
+      const lockerDoorMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8 });
+      const handleMat = new THREE.MeshStandardMaterial({ color: 0x52525b });
 
-      // 30 Student Desks & Chairs (6 columns x 5 rows = 30 seats)
+      // 10 columns x 3 rows = 30 individual student lockers along back wall (z = 6.95)
+      for (let col = 0; col < 10; col++) {
+        const lx = -5.4 + col * 1.2;
+        for (let row = 0; row < 3; row++) {
+          const ly = 0.35 + row * 0.62;
+          const box = new THREE.Mesh(new THREE.BoxGeometry(1.16, 0.58, 0.65), lockerBodyMat);
+          box.position.set(lx, ly, 7.05);
+          lockerGroup.add(box);
+
+          const door = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.52, 0.04), lockerDoorMat);
+          door.position.set(lx, ly, 6.71);
+          lockerGroup.add(door);
+
+          const handle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.14, 0.05), handleMat);
+          handle.position.set(lx + 0.42, ly, 6.68);
+          lockerGroup.add(handle);
+        }
+      }
+      threeScene.add(lockerGroup);
+      colliders.push({ minX: -6.2, maxX: 6.2, minZ: 6.45, maxZ: 7.5 });
+
+      // ==================== 30 STUDENT DESKS & CHAIRS (6 COLS x 5 ROWS = 30 SEATS) WITH COLLISION ====================
       chairPositions = [];
       const deskMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7 });
       const legMat = new THREE.MeshStandardMaterial({ color: 0x52525b });
       const chairMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
 
-      const cols = [-5.5, -3.3, -1.1, 1.1, 3.3, 5.5]; // 6 columns
-      const rows = [-3.3, -1.4, 0.5, 2.4, 4.3];       // 5 rows -> 6 * 5 = 30 desks
+      const colXs = [-5.5, -3.3, -1.1, 1.1, 3.3, 5.5]; // Wide 2.2m aisle spacing so avatars walk cleanly between desks
+      const rowZs = [-3.6, -1.6, 0.4, 2.4, 4.4];       // 2.0m row spacing
 
-      rows.forEach((z, rIdx) => {
-        cols.forEach((x, cIdx) => {
-          const desk = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.8), deskMat);
+      rowZs.forEach((z, rIdx) => {
+        colXs.forEach((x, cIdx) => {
+          const desk = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.76), deskMat);
           desk.position.set(x, 0.72, z);
           threeScene.add(desk);
 
-          [[-0.52, -0.32], [0.52, -0.32], [-0.52, 0.32], [0.52, 0.32]].forEach(([lx, lz]) => {
+          [[-0.5, -0.3], [0.5, -0.3], [-0.5, 0.3], [0.5, 0.3]].forEach(([lx, lz]) => {
             const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.72), legMat);
             leg.position.set(x + lx, 0.36, z + lz);
             threeScene.add(leg);
           });
 
-          const chairZ = z + 0.58;
-          const seat = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.07, 0.58), chairMat);
+          // Register solid desk collider so characters cannot walk through desks!
+          colliders.push({
+            minX: x - 0.76,
+            maxX: x + 0.76,
+            minZ: z - 0.52,
+            maxZ: z + 0.52
+          });
+
+          const chairZ = z + 0.62;
+          const seat = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.07, 0.55), chairMat);
           seat.position.set(x, 0.42, chairZ);
           threeScene.add(seat);
 
-          const backRest = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.52, 0.07), chairMat);
-          backRest.position.set(x, 0.68, chairZ + 0.25);
+          const backRest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.52, 0.07), chairMat);
+          backRest.position.set(x, 0.68, chairZ + 0.24);
           threeScene.add(backRest);
 
           chairPositions.push({ id: `chair-${rIdx * 6 + cIdx + 1}`, seatNum: rIdx * 6 + cIdx + 1, x, z: chairZ });
         });
       });
 
+      // Mouse Interaction: Drag to Rotate/Tilt Camera, Wheel to Zoom, Click Floor to Move
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
+      let downPos = { x: 0, y: 0 };
+
       threeRenderer.domElement.addEventListener('pointerdown', (e) => {
-        const rect = threeRenderer.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(mouse, threeCamera);
-        const floorHit = raycaster.intersectObjects(threeScene.children).find(h => h.object.name === 'classroomFloor');
-        if (floorHit) {
-          const st = getActiveStudent();
-          if (st && st.isSitting) {
-            st.isSitting = false;
-            updateStudentAvatarSprite(st);
-            updateSitButtonUI();
+        isDraggingCam = true;
+        downPos = { x: e.clientX, y: e.clientY };
+        prevMouse = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isDraggingCam || state.activeTab !== 'metaverse') return;
+        const dx = e.clientX - prevMouse.x;
+        const dy = e.clientY - prevMouse.y;
+        prevMouse = { x: e.clientX, y: e.clientY };
+        camYaw -= dx * 0.007;
+        camPitch = Math.max(0.18, Math.min(1.38, camPitch + dy * 0.006));
+        updateCameraOrbit();
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        if (!isDraggingCam) return;
+        isDraggingCam = false;
+        const movedDist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+        if (movedDist < 5 && state.activeTab === 'metaverse') {
+          const rect = threeRenderer.domElement.getBoundingClientRect();
+          mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          raycaster.setFromCamera(mouse, threeCamera);
+          const floorHit = raycaster.intersectObjects(threeScene.children).find(h => h.object.name === 'classroomFloor');
+          if (floorHit) {
+            const st = getActiveStudent();
+            if (st && st.isSitting) {
+              st.isSitting = false;
+              apply3DSitPose(studentMeshes[st.id], false);
+              updateSitButtonUI();
+            }
+            targetMovePos = {
+              x: Math.max(-7.3, Math.min(7.3, floorHit.point.x)),
+              z: Math.max(-6.8, Math.min(6.1, floorHit.point.z))
+            };
           }
-          targetMovePos = {
-            x: Math.max(-7.2, Math.min(7.2, floorHit.point.x)),
-            z: Math.max(-5.8, Math.min(5.8, floorHit.point.z))
-          };
         }
       });
 
+      threeRenderer.domElement.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        adjustCameraZoom(e.deltaY * 0.008);
+      }, { passive: false });
+
       window.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
-        keysPressed[e.key.toLowerCase()] = true;
-        if (e.key.toLowerCase() === 'e' && state.activeTab === 'metaverse') toggleSitStand();
+        const k = e.key.toLowerCase();
+        keysPressed[k] = true;
+        if (state.activeTab === 'metaverse') {
+          if (k === 'e') toggleSitStand();
+          if (k === 'h') triggerWaveGreeting();
+        }
       });
       window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
 
@@ -1034,6 +1257,19 @@
       animateThreeClassroom();
     }
 
+    // Check AABB Collision against Desks, Podium, Teacher Desk, and Lockers
+    function isPositionBlocked(nx, nz) {
+      if (nx < -7.4 || nx > 7.4 || nz < -6.8 || nz > 6.2) return true;
+      for (let i = 0; i < colliders.length; i++) {
+        const c = colliders[i];
+        if (nx > c.minX && nx < c.maxX && nz > c.minZ && nz < c.maxZ) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Create Name & Chat Bubble Sprite above 3D Character
     function createNameSprite(text, chatText) {
       const canvas = document.createElement('canvas');
       canvas.width = 320;
@@ -1043,25 +1279,25 @@
       if (chatText) {
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.roundRect(20, 8, 280, 44, 14);
+        ctx.roundRect(16, 6, 288, 44, 14);
         ctx.fill();
         ctx.strokeStyle = '#18181b';
         ctx.lineWidth = 3;
         ctx.stroke();
         ctx.fillStyle = '#18181b';
-        ctx.font = 'bold 20px sans-serif';
+        ctx.font = 'bold 19px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(chatText.slice(0, 16), 160, 36);
+        ctx.fillText(chatText.slice(0, 16), 160, 35);
       }
 
-      ctx.fillStyle = 'rgba(24, 24, 27, 0.85)';
+      ctx.fillStyle = 'rgba(24, 24, 27, 0.86)';
       ctx.beginPath();
-      ctx.roundRect(70, 62, 180, 34, 12);
+      ctx.roundRect(65, 60, 190, 34, 12);
       ctx.fill();
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px sans-serif';
+      ctx.font = 'bold 19px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(text, 160, 85);
+      ctx.fillText(text, 160, 83);
 
       const tex = new THREE.CanvasTexture(canvas);
       const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
@@ -1069,14 +1305,198 @@
       return sprite;
     }
 
-    function updateStudentAvatarSprite(st) {
-      const group = studentMeshes[st.id];
-      if (!group) return;
-      const avatarSprite = group.getObjectByName('avatarSprite');
-      if (avatarSprite) {
-        avatarSprite.material.map = createAvatarTexture(st.equipped, st.isSitting);
-        avatarSprite.material.needsUpdate = true;
-        avatarSprite.position.y = st.isSitting ? 0.78 : 0.92;
+    // Build Full 3D Chibi Character Mesh (Front, Back, Left, Right Directional Facing + Equipped Items + Waving Arm)
+    function buildFull3DStudentMesh(st) {
+      const root = new THREE.Group();
+      const bodyPivot = new THREE.Group();
+      bodyPivot.name = 'bodyPivot';
+      root.add(bodyPivot);
+
+      const shirtColor = st.equipped?.shirtColor || '#881337';
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
+      const pantsMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
+      const shoeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7 });
+      const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColor });
+
+      // Ground shadow
+      const shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(0.36, 20),
+        new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.16 })
+      );
+      shadow.rotation.x = -Math.PI / 2;
+      shadow.position.y = 0.01;
+      root.add(shadow);
+
+      // Legs & White Sneakers
+      const leftLeg = new THREE.Group();
+      leftLeg.position.set(-0.11, 0.42, 0);
+      leftLeg.name = 'leftLeg';
+      const lPant = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.28, 0.14), pantsMat);
+      lPant.position.y = -0.14;
+      const lShoe = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.11, 0.22), shoeMat);
+      lShoe.position.set(0, -0.32, 0.03);
+      leftLeg.add(lPant, lShoe);
+      bodyPivot.add(leftLeg);
+
+      const rightLeg = new THREE.Group();
+      rightLeg.position.set(0.11, 0.42, 0);
+      rightLeg.name = 'rightLeg';
+      const rPant = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.28, 0.14), pantsMat);
+      rPant.position.y = -0.14;
+      const rShoe = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.11, 0.22), shoeMat);
+      rShoe.position.set(0, -0.32, 0.03);
+      rightLeg.add(rPant, rShoe);
+      bodyPivot.add(rightLeg);
+
+      // Torso (Baseball Jersey Style)
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.48, 0.26), shirtMat);
+      torso.position.y = 0.66;
+      bodyPivot.add(torso);
+
+      // White front jersey stripe (gives clear front vs back visual distinction!)
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.46, 0.02), shoeMat);
+      stripe.position.set(0, 0.66, 0.135);
+      bodyPivot.add(stripe);
+
+      // Left Arm
+      const leftArm = new THREE.Group();
+      leftArm.position.set(-0.29, 0.85, 0);
+      leftArm.name = 'leftArm';
+      const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.24, 0.14), shirtMat);
+      lSleeve.position.y = -0.12;
+      const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.14, 0.11), skinMat);
+      lHand.position.y = -0.29;
+      leftArm.add(lSleeve, lHand);
+      bodyPivot.add(leftArm);
+
+      // Right Arm (Animated when waving greeting!)
+      const rightArm = new THREE.Group();
+      rightArm.position.set(0.29, 0.85, 0);
+      rightArm.name = 'rightArm';
+      const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.24, 0.14), shirtMat);
+      rSleeve.position.y = -0.12;
+      const rBand = new THREE.Mesh(new THREE.BoxGeometry(0.135, 0.05, 0.145), shoeMat);
+      rBand.position.y = -0.22;
+      const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.14, 0.11), skinMat);
+      rHand.position.y = -0.30;
+      rightArm.add(rSleeve, rBand, rHand);
+      bodyPivot.add(rightArm);
+
+      // Chibi Head (Large 3D Box/Rounded Head with Clear Front Face & Back Hair)
+      const headGroup = new THREE.Group();
+      headGroup.position.set(0, 1.24, 0);
+      bodyPivot.add(headGroup);
+
+      const faceBox = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.56, 0.56), skinMat);
+      headGroup.add(faceBox);
+
+      // Hair Top, Back, and Sideburns (Back of head is completely covered in dark hair!)
+      const hairTop = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.2, 0.62), darkMat);
+      hairTop.position.set(0, 0.24, -0.01);
+      headGroup.add(hairTop);
+
+      const hairBack = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.54, 0.14), darkMat);
+      hairBack.position.set(0, 0.02, -0.24);
+      headGroup.add(hairBack);
+
+      const hairLeft = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.44, 0.54), darkMat);
+      hairLeft.position.set(-0.31, 0.06, -0.02);
+      headGroup.add(hairLeft);
+
+      const hairRight = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.44, 0.54), darkMat);
+      hairRight.position.set(0.31, 0.06, -0.02);
+      headGroup.add(hairRight);
+
+      // Front Parted Bangs
+      const bangL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.06), darkMat);
+      bangL.position.set(-0.17, 0.15, 0.28);
+      const bangR = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.06), darkMat);
+      bangR.position.set(0.17, 0.15, 0.28);
+      headGroup.add(bangL, bangR);
+
+      // Eyes on Front (+Z face)
+      const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.11, 0.03), darkMat);
+      eyeL.position.set(-0.14, -0.02, 0.285);
+      const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.11, 0.03), darkMat);
+      eyeR.position.set(0.14, -0.02, 0.285);
+      headGroup.add(eyeL, eyeR);
+
+      // Round Wire Glasses if equipped
+      if (st.equipped?.glasses) {
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46 });
+        const rimL = new THREE.Mesh(new THREE.TorusGeometry(0.095, 0.015, 8, 20), glassMat);
+        rimL.position.set(-0.14, -0.02, 0.30);
+        const rimR = new THREE.Mesh(new THREE.TorusGeometry(0.095, 0.015, 8, 20), glassMat);
+        rimR.position.set(0.14, -0.02, 0.30);
+        const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.02, 0.02), glassMat);
+        bridge.position.set(0, -0.01, 0.30);
+        headGroup.add(rimL, rimR, bridge);
+      }
+
+      // Hat / Crown if equipped
+      if (st.equipped?.hat === '👑') {
+        const crown = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.22, 0.18, 0.18, 8),
+          new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.4, roughness: 0.3 })
+        );
+        crown.position.set(0, 0.42, 0.02);
+        headGroup.add(crown);
+      } else if (st.equipped?.hat) {
+        const cap = new THREE.Mesh(
+          new THREE.BoxGeometry(0.56, 0.14, 0.56),
+          new THREE.MeshStandardMaterial({ color: 0x2563eb })
+        );
+        cap.position.set(0, 0.36, 0);
+        const visor = new THREE.Mesh(
+          new THREE.BoxGeometry(0.46, 0.04, 0.26),
+          new THREE.MeshStandardMaterial({ color: 0x1d4ed8 })
+        );
+        visor.position.set(0, 0.31, 0.32);
+        headGroup.add(cap, visor);
+      }
+
+      // Cute Grey Cat Doll Pet next to character if equipped
+      if (st.equipped?.pet) {
+        const petGroup = new THREE.Group();
+        petGroup.position.set(0.48, 0.22, 0.05);
+        const petBody = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.26, 0.22), new THREE.MeshStandardMaterial({ color: 0x71717a }));
+        const earL = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.1, 4), new THREE.MeshStandardMaterial({ color: 0x71717a }));
+        earL.position.set(-0.07, 0.17, 0);
+        const earR = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.1, 4), new THREE.MeshStandardMaterial({ color: 0x71717a }));
+        earR.position.set(0.07, 0.17, 0);
+        const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.05, 0.05), new THREE.MeshStandardMaterial({ color: 0xf9a8d4 }));
+        ribbon.position.set(0, 0.14, 0.09);
+        petGroup.add(petBody, earL, earR, ribbon);
+        bodyPivot.add(petGroup);
+      }
+
+      // Name & Chat Sprite above head
+      const label = createNameSprite(`${st.num}번 ${st.name}`, st.chat);
+      label.position.y = 2.02;
+      label.name = 'nameLabel';
+      root.add(label);
+
+      bodyPivot.rotation.y = st.rotY || 0;
+      root.position.set(st.x || 0, 0, st.z || 0);
+      apply3DSitPose(root, st.isSitting);
+
+      return root;
+    }
+
+    function apply3DSitPose(rootGroup, isSitting) {
+      if (!rootGroup) return;
+      const bodyPivot = rootGroup.getObjectByName('bodyPivot');
+      const leftLeg = rootGroup.getObjectByName('leftLeg');
+      const rightLeg = rootGroup.getObjectByName('rightLeg');
+      if (isSitting) {
+        if (bodyPivot) bodyPivot.position.y = -0.14;
+        if (leftLeg) leftLeg.rotation.x = -Math.PI / 2.1;
+        if (rightLeg) rightLeg.rotation.x = -Math.PI / 2.1;
+      } else {
+        if (bodyPivot) bodyPivot.position.y = 0;
+        if (leftLeg) leftLeg.rotation.x = 0;
+        if (rightLeg) rightLeg.rotation.x = 0;
       }
     }
 
@@ -1087,29 +1507,31 @@
 
       const cls = getCurrentClass();
       cls.students.forEach(st => {
-        const group = new THREE.Group();
-
-        // Render the exact Maple-style Pixel Avatar inside the 3D Classroom
-        const avatarTex = createAvatarTexture(st.equipped, st.isSitting);
-        const avatarMat = new THREE.SpriteMaterial({ map: avatarTex, transparent: true });
-        const avatarSprite = new THREE.Sprite(avatarMat);
-        avatarSprite.name = 'avatarSprite';
-        avatarSprite.scale.set(1.45, 1.82, 1);
-        avatarSprite.position.y = st.isSitting ? 0.78 : 0.92;
-        group.add(avatarSprite);
-
-        // Name & Speech Bubble Sprite above head
-        const label = createNameSprite(`${st.num}번 ${st.name}`, st.chat);
-        label.position.y = 2.02;
-        group.add(label);
-
-        group.position.set(st.x || 0, 0, st.z || 0);
-        threeScene.add(group);
-        studentMeshes[st.id] = group;
+        const meshGroup = buildFull3DStudentMesh(st);
+        threeScene.add(meshGroup);
+        studentMeshes[st.id] = meshGroup;
       });
 
       updateMetaverseRoster();
       updateSitButtonUI();
+    }
+
+    // Wave Greeting Animation & Speech Bubble ("안녕하세요! 👋")
+    function triggerWaveGreeting() {
+      const st = getActiveStudent();
+      if (!st) return;
+      st.isWaving = true;
+      st.waveStart = performance.now();
+      st.chat = '안녕하세요! 👋';
+      rebuild3DStudents();
+      showToast(`${st.name} 학생이 친구들에게 인사합니다!`);
+
+      clearTimeout(window._waveTimer);
+      window._waveTimer = setTimeout(() => {
+        st.isWaving = false;
+        if (st.chat === '안녕하세요! 👋') st.chat = '';
+        rebuild3DStudents();
+      }, 3200);
     }
 
     function toggleSitStand() {
@@ -1122,21 +1544,25 @@
         st.isSitting = false;
         st.z += 0.35;
         group.position.z = st.z;
-        updateStudentAvatarSprite(st);
+        apply3DSitPose(group, false);
+        showToast(`${st.name} 캐릭터가 자리에서 일어났습니다.`);
       } else {
         let nearest = null, minDist = 999;
         chairPositions.forEach(c => {
           const d = Math.hypot(st.x - c.x, st.z - c.z);
           if (d < minDist) { minDist = d; nearest = c; }
         });
-        if (nearest && minDist < 1.6) {
+        if (nearest && minDist < 1.65) {
           st.x = nearest.x;
           st.z = nearest.z;
           st.isSitting = true;
+          st.rotY = Math.PI; // Face front whiteboard (-Z direction)
           targetMovePos = null;
           group.position.set(st.x, 0, st.z);
-          updateStudentAvatarSprite(st);
-          showToast(`${nearest.seatNum}번 좌석에 앉았습니다.`);
+          const bodyPivot = group.getObjectByName('bodyPivot');
+          if (bodyPivot) bodyPivot.rotation.y = Math.PI;
+          apply3DSitPose(group, true);
+          showToast(`${nearest.seatNum}번 의자에 앉았습니다.`);
         } else {
           showToast('책상 의자 근처로 이동 후 앉기(E)를 눌러주세요.');
         }
@@ -1151,14 +1577,15 @@
       const btnText = document.getElementById('sitStandText');
       const overlay = document.getElementById('metaverseStatusOverlay');
       if (!st || !btnText) return;
-      btnText.textContent = st.isSitting ? '의자에서 일어서기 (E)' : '가까운 의자에 앉기 (E)';
+      btnText.textContent = st.isSitting ? '일어서기 (E)' : '의자 앉기 (E)';
       overlay.textContent = `${st.name} · ${st.isSitting ? '의자에 착석 중' : '교실 이동 중'}`;
     }
 
     function resetCameraView() {
-      if (!threeCamera) return;
-      threeCamera.position.set(0, 10.5, 13.0);
-      threeCamera.lookAt(0, 0.6, -0.5);
+      camYaw = 0;
+      camPitch = 0.58;
+      camDist = 15.0;
+      updateCameraOrbit();
     }
 
     function sendMetaverseChat() {
@@ -1185,7 +1612,7 @@
         return `
           <div class="p-2.5 rounded-xl border ${isMe ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-100'} flex items-center justify-between text-xs">
             <div>
-              <div class="font-bold text-zinc-900">${st.num}번 ${st.name}</div>
+              <div class="font-bold text-zinc-900">${st.equipped?.hat || ''} ${st.num}번 ${st.name} ${st.equipped?.pet || ''}</div>
               <div class="text-[11px] text-zinc-400">${job ? job.title : '-'} · ${st.isSitting ? '착석' : '활동중'}</div>
             </div>
             ${isMe ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-900 text-white">나</span>' : ''}
@@ -1194,12 +1621,16 @@
       }).join('');
     }
 
-    function animateThreeClassroom() {
+    function animateThreeClassroom(now) {
       requestAnimationFrame(animateThreeClassroom);
       if (state.activeTab === 'metaverse') {
-        const st = getActiveStudent();
-        if (st && studentMeshes[st.id]) {
-          const group = studentMeshes[st.id];
+        const cls = getCurrentClass();
+        const activeSt = getActiveStudent();
+
+        // Handle Active Character Movement & Directional Facing + Desk Collision
+        if (activeSt && studentMeshes[activeSt.id]) {
+          const group = studentMeshes[activeSt.id];
+          const bodyPivot = group.getObjectByName('bodyPivot');
           const speed = 0.08;
           let dx = 0, dz = 0;
 
@@ -1210,26 +1641,70 @@
 
           if (dx !== 0 || dz !== 0) {
             targetMovePos = null;
-            if (st.isSitting) {
-              st.isSitting = false;
-              updateStudentAvatarSprite(st);
+            if (activeSt.isSitting) {
+              activeSt.isSitting = false;
+              apply3DSitPose(group, false);
               updateSitButtonUI();
             }
           } else if (targetMovePos) {
-            const dist = Math.hypot(targetMovePos.x - st.x, targetMovePos.z - st.z);
+            const dist = Math.hypot(targetMovePos.x - activeSt.x, targetMovePos.z - activeSt.z);
             if (dist > 0.08) {
-              dx = ((targetMovePos.x - st.x) / dist) * speed;
-              dz = ((targetMovePos.z - st.z) / dist) * speed;
-            } else targetMovePos = null;
+              dx = ((targetMovePos.x - activeSt.x) / dist) * speed;
+              dz = ((targetMovePos.z - activeSt.z) / dist) * speed;
+            } else {
+              targetMovePos = null;
+            }
           }
 
           if (dx !== 0 || dz !== 0) {
-            st.x = Math.max(-7.2, Math.min(7.2, st.x + dx));
-            st.z = Math.max(-5.8, Math.min(5.8, st.z + dz));
-            group.position.x = st.x;
-            group.position.z = st.z;
+            // Turn character smoothly to face movement direction (front, back, left, right)
+            const targetAngle = Math.atan2(dx, dz);
+            activeSt.rotY = targetAngle;
+            if (bodyPivot) bodyPivot.rotation.y = targetAngle;
+
+            // Slide collision check on X and Z axes independently so character never passes through desks!
+            let moved = false;
+            if (!isPositionBlocked(activeSt.x + dx, activeSt.z)) {
+              activeSt.x += dx;
+              moved = true;
+            }
+            if (!isPositionBlocked(activeSt.x, activeSt.z + dz)) {
+              activeSt.z += dz;
+              moved = true;
+            }
+            if (!moved) targetMovePos = null;
+
+            group.position.x = activeSt.x;
+            group.position.z = activeSt.z;
+
+            // Subtle walking leg swing
+            const lLeg = group.getObjectByName('leftLeg');
+            const rLeg = group.getObjectByName('rightLeg');
+            const swing = Math.sin(now * 0.015) * 0.45;
+            if (lLeg) lLeg.rotation.x = swing;
+            if (rLeg) rLeg.rotation.x = -swing;
+          } else if (!activeSt.isSitting) {
+            const lLeg = group.getObjectByName('leftLeg');
+            const rLeg = group.getObjectByName('rightLeg');
+            if (lLeg) lLeg.rotation.x = 0;
+            if (rLeg) rLeg.rotation.x = 0;
           }
         }
+
+        // Animate Waving Arm for any waving student
+        cls.students.forEach(st => {
+          const group = studentMeshes[st.id];
+          if (!group) return;
+          const rArm = group.getObjectByName('rightArm');
+          if (rArm) {
+            if (st.isWaving) {
+              rArm.rotation.z = -2.4 + Math.sin(now * 0.018) * 0.45;
+            } else {
+              rArm.rotation.z = 0;
+            }
+          }
+        });
+
         threeRenderer.render(threeScene, threeCamera);
       }
     }
@@ -1338,7 +1813,7 @@
 
       if (st) {
         document.getElementById('shopUserBalance').textContent = `${st.balance.toLocaleString()} ${cls.currency}`;
-        drawMaplePixelAvatar(document.getElementById('shopAvatarCanvas'), st.equipped, false);
+        drawMaplePixelAvatar(document.getElementById('shopAvatarCanvas'), st.equipped);
 
         const invEl = document.getElementById('userInventoryList');
         if (!st.inventory || st.inventory.length === 0) {
@@ -1576,18 +2051,31 @@
 
       const seatGrid = document.getElementById('seatingGrid');
       seatGrid.style.gridTemplateColumns = `repeat(${state.seatCols}, minmax(0, 1fr))`;
-      seatGrid.innerHTML = cls.students.map((st, idx) => {
-        const job = cls.jobs.find(j => j.id === st.jobId);
-        const isSel = state.selectedSeatStudentId === st.id;
-        return `
-          <div draggable="true" ondragstart="onSeatDragStart(event, '${st.id}')" ondragover="event.preventDefault()" ondrop="onSeatDrop(event, '${st.id}')" onclick="onSeatClick('${st.id}')"
-               class="cursor-pointer p-3 rounded-xl border text-center transition ${isSel ? 'border-zinc-900 bg-zinc-100' : 'border-zinc-200 bg-zinc-50/50 hover:border-zinc-400'}">
-            <div class="text-[10px] text-zinc-400">좌석 ${idx + 1}</div>
-            <div class="text-xs font-extrabold text-zinc-900 mt-0.5">${st.num}번 ${st.name}</div>
-            <div class="text-[10px] text-zinc-500 mt-0.5">${job ? job.title : '-'}</div>
-          </div>
-        `;
-      }).join('');
+      const totalSeats = Math.max(30, cls.students.length);
+      let seatHtml = '';
+      for (let i = 0; i < totalSeats; i++) {
+        const st = cls.students[i];
+        if (st) {
+          const job = cls.jobs.find(j => j.id === st.jobId);
+          const isSel = state.selectedSeatStudentId === st.id;
+          seatHtml += `
+            <div draggable="true" ondragstart="onSeatDragStart(event, '${st.id}')" ondragover="event.preventDefault()" ondrop="onSeatDrop(event, '${st.id}')" onclick="onSeatClick('${st.id}')"
+                 class="cursor-pointer p-2.5 rounded-xl border text-center transition ${isSel ? 'border-zinc-900 bg-zinc-100' : 'border-zinc-200 bg-zinc-50/70 hover:border-zinc-400'}">
+              <div class="text-[10px] text-zinc-400">좌석 ${i + 1}</div>
+              <div class="text-xs font-extrabold text-zinc-900 mt-0.5">${st.num}번 ${st.name}</div>
+              <div class="text-[10px] text-zinc-500 mt-0.5">${job ? job.title : '-'}</div>
+            </div>
+          `;
+        } else {
+          seatHtml += `
+            <div class="p-2.5 rounded-xl border border-dashed border-zinc-200 bg-white text-center opacity-60">
+              <div class="text-[10px] text-zinc-400">좌석 ${i + 1}</div>
+              <div class="text-xs font-semibold text-zinc-300 mt-1">빈 자리</div>
+            </div>
+          `;
+        }
+      }
+      seatGrid.innerHTML = seatHtml;
     }
 
     function payIndividualSalary(studentId) {
@@ -1676,11 +2164,12 @@
         id: 's-' + Date.now(), num, name, jobId, isAdmin: false, balance: 1000,
         portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: [],
         equipped: { hat: '', glasses: '', shirtColor: '#881337', pet: '' },
-        x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 6, isSitting: false, chat: ''
+        x: -2.2, z: 5.5, rotY: 0, isSitting: false, chat: ''
       });
       document.getElementById('newStudentName').value = '';
       saveState();
       renderAll();
+      if (threeScene) rebuild3DStudents();
     }
 
     function removeStudent(studentId) {
@@ -1688,6 +2177,7 @@
       cls.students = cls.students.filter(s => s.id !== studentId);
       saveState();
       renderAll();
+      if (threeScene) rebuild3DStudents();
     }
 
     function downloadSampleExcel() {
@@ -1710,7 +2200,8 @@
         const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
         if (!json.length) return;
         const cls = getCurrentClass();
-        const cols = [-5.5, -3.3, -1.1, 1.1, 3.3, 5.5];
+        const aisleXs = [-4.4, -2.2, 0.0, 2.2, 4.4, 6.4];
+        const aisleZs = [-2.5, -0.5, 1.5, 3.5, 5.4];
         cls.students = json.map((row, idx) => {
           const num = parseInt(row['번호'] || (idx + 1), 10);
           const name = String(row['이름'] || `학생${idx + 1}`).trim();
@@ -1720,12 +2211,13 @@
             id: 's-xl-' + Date.now() + '-' + idx, num, name, jobId: matchedJob ? matchedJob.id : '',
             isAdmin: idx === 0, balance: 1000, portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: [],
             equipped: { hat: '', glasses: '', shirtColor: '#881337', pet: '' },
-            x: cols[idx % 6], z: -2.2 + Math.floor(idx / 6) * 1.9, isSitting: false, chat: ''
+            x: aisleXs[idx % aisleXs.length], z: aisleZs[Math.floor(idx / aisleXs.length) % aisleZs.length], rotY: 0, isSitting: false, chat: ''
           };
         });
         state.activeUserId = cls.students[0].id;
         saveState();
         renderAll();
+        if (threeScene) rebuild3DStudents();
         showToast(`${cls.students.length}명 엑셀 등록 완료`);
       };
       reader.readAsArrayBuffer(file);
