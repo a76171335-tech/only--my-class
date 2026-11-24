@@ -3,408 +3,533 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>우리반 금융 & 3D 메타버스 교실 (Beta)</title>
+  <title>우리반 금융 & 3D 교실 (Minimal Beta)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
-    .tab-active { background-color: #1e293b; color: #ffffff; }
-    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    #threeContainer canvas { display: block; border-radius: 0.75rem; }
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #fafafa; color: #18181b; }
+    .nav-pill-active { background-color: #18181b; color: #ffffff; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 9999px; }
+    .pixel-art { image-rendering: pixelated; image-rendering: crisp-edges; }
+    #threeContainer canvas { display: block; border-radius: 1rem; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col antialiased selection:bg-zinc-900 selection:text-white">
 
-  <!-- Top Navigation Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-          ₩
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-lg tracking-tight text-slate-900">우리반 금융 & 3D 교실</h1>
-            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">BETA</span>
-          </div>
-          <p class="text-xs text-slate-500">학급 경제·직업·투자·미션·3D 메타버스 통합 플랫폼</p>
-        </div>
+  <!-- Minimalist Sticky Header -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-sm">₩</div>
+        <span class="font-extrabold text-base tracking-tight text-zinc-900">우리반 금융</span>
+        <span class="hidden sm:inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">BETA</span>
       </div>
 
-      <!-- Class Selector & Role Switcher -->
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
-          <select id="classSelect" onchange="switchClass(this.value)" class="bg-transparent text-sm font-semibold text-slate-800 px-2 py-1 focus:outline-none"></select>
-          <button onclick="openNewClassModal()" title="새 반 생성" class="ml-1 px-2 py-1 bg-white hover:bg-slate-200 text-slate-700 rounded-md text-xs font-bold shadow-xs transition">
-            + 반 추가
-          </button>
+      <!-- Class & Account Switcher -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center bg-zinc-100 rounded-lg px-2 py-1">
+          <select id="classSelect" onchange="switchClass(this.value)" class="bg-transparent text-xs font-bold text-zinc-800 focus:outline-none cursor-pointer"></select>
+          <button onclick="openNewClassModal()" title="새 반 추가" class="ml-1.5 w-5 h-5 rounded bg-white text-zinc-700 hover:bg-zinc-200 flex items-center justify-center text-xs font-bold shadow-2xs">+</button>
         </div>
 
-        <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
-          <span class="text-xs text-slate-500 pl-2 pr-1">접속 계정:</span>
-          <select id="activeUserSelect" onchange="switchActiveUser(this.value)" class="bg-transparent text-sm font-semibold text-indigo-700 px-2 py-1 focus:outline-none"></select>
+        <div class="flex items-center bg-zinc-100 rounded-lg px-2.5 py-1">
+          <select id="activeUserSelect" onchange="switchActiveUser(this.value)" class="bg-transparent text-xs font-bold text-zinc-900 focus:outline-none cursor-pointer"></select>
         </div>
 
-        <button onclick="resetAllDemoData()" class="text-xs text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg border border-transparent hover:border-rose-200 transition">
-          초기화
+        <button onclick="resetAllDemoData()" title="초기화" class="p-1.5 text-zinc-400 hover:text-zinc-900 transition">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <nav class="max-w-7xl mx-auto px-4 pb-2 flex gap-1.5 overflow-x-auto custom-scroll">
-      <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn tab-active px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> 대시보드·급여
-      </button>
-      <button onclick="switchTab('metaverse')" data-tab="metaverse" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="box" class="w-4 h-4"></i> 3D 교실 광장
-      </button>
-      <button onclick="switchTab('invest')" data-tab="invest" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="trending-up" class="w-4 h-4"></i> 투자·경제뉴스
-      </button>
-      <button onclick="switchTab('missions')" data-tab="missions" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="award" class="w-4 h-4"></i> 학급 미션
-      </button>
-      <button onclick="switchTab('jobs')" data-tab="jobs" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="briefcase" class="w-4 h-4"></i> 직업·급여 설정 (30종+)
-      </button>
-      <button onclick="switchTab('students')" data-tab="students" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="users" class="w-4 h-4"></i> 학생 명단·엑셀
-      </button>
-      <button onclick="switchTab('seating')" data-tab="seating" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="grid" class="w-4 h-4"></i> 자리 배치도
-      </button>
-      <button onclick="switchTab('shop')" data-tab="shop" class="nav-btn text-slate-600 hover:bg-slate-100 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap transition">
-        <i data-lucide="shopping-bag" class="w-4 h-4"></i> 학급 상점·아바타
-      </button>
-    </nav>
+    <!-- Clean 5-Tab Navigation -->
+    <div class="border-t border-zinc-100 bg-white">
+      <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-1.5 overflow-x-auto custom-scroll">
+        <button onclick="switchTab('home')" data-tab="home" class="nav-btn nav-pill-active px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i> 홈 · 내 지갑
+        </button>
+        <button onclick="switchTab('metaverse')" data-tab="metaverse" class="nav-btn text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition">
+          <i data-lucide="box" class="w-3.5 h-3.5"></i> 3D 교실 광장
+        </button>
+        <button onclick="switchTab('invest')" data-tab="invest" class="nav-btn text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> 투자 · 아침뉴스
+        </button>
+        <button onclick="switchTab('shop')" data-tab="shop" class="nav-btn text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition">
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> 상점 · 아바타
+        </button>
+        <button onclick="switchTab('manage')" data-tab="manage" class="nav-btn text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> 학급 관리 (급여·직업·자리·명단)
+        </button>
+      </nav>
+    </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-1">
-    <!-- Toast Banner -->
-    <div id="toastBox" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2"></div>
+  <!-- Main Workspace -->
+  <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
+    <div id="toastBox" class="fixed bottom-5 right-5 z-50 hidden bg-zinc-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg"></div>
 
-    <!-- 1. DASHBOARD TAB -->
-    <section id="tab-dashboard" class="tab-section space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div class="text-xs font-semibold text-slate-400">현재 학급</div>
-          <div id="dashClassName" class="text-2xl font-extrabold text-slate-900 mt-1">-</div>
-          <div id="dashCurrency" class="text-xs text-indigo-600 font-semibold mt-1">화폐 단위: 미소</div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div class="text-xs font-semibold text-slate-400">재적 학생 수</div>
-          <div id="dashStudentCount" class="text-2xl font-extrabold text-slate-900 mt-1">0명</div>
-          <div id="dashAdminCount" class="text-xs text-slate-500 mt-1">학생 은행원(관리자): 0명</div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div class="text-xs font-semibold text-slate-400">학급 총 통화량</div>
-          <div id="dashTotalMoney" class="text-2xl font-extrabold text-emerald-600 mt-1">0</div>
-          <div class="text-xs text-slate-500 mt-1">학생 보유 현금 합계</div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-          <div>
-            <div class="text-xs font-semibold text-slate-400">일괄 급여 지급</div>
-            <p class="text-xs text-slate-500 mt-1">배정된 직업 기준 전원 월급 지급</p>
+    <!-- ==================== TAB 1: HOME (STUDENT FIRST VIEW + TEACHER SUMMARY) ==================== -->
+    <section id="tab-home" class="tab-section space-y-6">
+      <!-- Top Grid: My Pixel Avatar Card + Salary/Job & News/Invest Quick Hub -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left 4 Cols: My Character & Wallet -->
+        <div class="lg:col-span-4 bg-white rounded-2xl border border-zinc-200/90 p-6 flex flex-col items-center text-center justify-between">
+          <div class="w-full flex items-center justify-between text-xs text-zinc-400">
+            <span id="homeRoleBadge" class="font-semibold text-zinc-600">학생 프로필</span>
+            <button onclick="switchTab('shop')" class="text-zinc-500 hover:text-zinc-900 underline font-medium">꾸미기</button>
           </div>
-          <button id="payAllBtn" onclick="payAllSalaries()" class="mt-3 w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white text-sm font-bold rounded-xl transition">
-            전원 급여 일괄 지급
+
+          <!-- Maple-Style Pixel Character Canvas -->
+          <div class="my-3 relative flex flex-col items-center">
+            <div class="w-36 h-44 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center relative overflow-hidden">
+              <canvas id="homeAvatarCanvas" width="128" height="160" class="pixel-art w-32 h-40"></canvas>
+            </div>
+            <div class="mt-3">
+              <div id="homeStudentName" class="text-lg font-extrabold text-zinc-900">-</div>
+              <div id="homeStudentJob" class="text-xs font-semibold text-zinc-500 mt-0.5">-</div>
+            </div>
+          </div>
+
+          <!-- Balance & Base Salary Box -->
+          <div class="w-full grid grid-cols-2 gap-2.5 pt-4 border-t border-zinc-100 text-left">
+            <div class="bg-zinc-50 rounded-xl p-3">
+              <div class="text-[11px] text-zinc-400 font-medium">내 보유 잔액</div>
+              <div id="homeBalance" class="text-base font-extrabold text-zinc-900 mt-0.5">0</div>
+            </div>
+            <div class="bg-zinc-50 rounded-xl p-3">
+              <div class="text-[11px] text-zinc-400 font-medium">직업 기본 급여</div>
+              <div id="homeSalary" class="text-base font-extrabold text-emerald-600 mt-0.5">0</div>
+            </div>
+          </div>
+
+          <button onclick="switchTab('metaverse')" class="mt-3 w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+            <i data-lucide="box" class="w-3.5 h-3.5"></i> 내 캐릭터로 3D 교실 입장하기
           </button>
         </div>
-      </div>
 
-      <!-- Student Wallet & Status Table -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 class="font-bold text-base text-slate-900">학생별 직업·자산 현황 및 개별 급여/보너스 지급</h2>
-            <p class="text-xs text-slate-500">교사 또는 관리자 권한을 부여받은 학생만 급여를 지급할 수 있습니다.</p>
+        <!-- Right 8 Cols: Morning News + Go to Invest + Today's Missions -->
+        <div class="lg:col-span-8 flex flex-col gap-5">
+          
+          <!-- Morning Financial News & Direct Invest CTA -->
+          <div class="bg-white rounded-2xl border border-zinc-200/90 p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span id="homeNewsDay" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Day 1 오늘의 경제 뉴스</span>
+                <button onclick="advanceMorningNews()" class="text-xs font-semibold text-zinc-500 hover:text-zinc-900 flex items-center gap-1">
+                  <i data-lucide="sunrise" class="w-3.5 h-3.5"></i> 다음 날 아침 뉴스
+                </button>
+              </div>
+              <h2 id="homeNewsTitle" class="text-base font-extrabold text-zinc-900 leading-snug">-</h2>
+              <p id="homeNewsBody" class="text-xs text-zinc-500 mt-1.5 leading-relaxed line-clamp-2">-</p>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-3">
+              <div id="homeNewsBadges" class="flex flex-wrap gap-1.5 text-[11px]"></div>
+              <button onclick="switchTab('invest')" class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition flex items-center gap-1.5">
+                투자하러 가기 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
-          <span id="roleBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">교사(최고 관리자) 모드</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
-              <tr>
-                <th class="py-3 px-4">번호</th>
-                <th class="py-3 px-4">이름</th>
-                <th class="py-3 px-4">권한</th>
-                <th class="py-3 px-4">배정 직업</th>
-                <th class="py-3 px-4">기본 급여</th>
-                <th class="py-3 px-4">보유 잔액</th>
-                <th class="py-3 px-4 text-right">관리자 급여 지급</th>
-              </tr>
-            </thead>
-            <tbody id="dashboardTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
+
+          <!-- Today's Missions Card -->
+          <div class="bg-white rounded-2xl border border-zinc-200/90 p-6 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="font-extrabold text-base text-zinc-900">오늘의 학급 미션</h3>
+                  <p class="text-xs text-zinc-400">미션을 완료하고 추가 보너스를 받으세요.</p>
+                </div>
+                <button id="homeAddMissionBtn" onclick="openNewMissionModal()" class="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition">
+                  + 미션 등록
+                </button>
+              </div>
+              <div id="homeMissionsList" class="space-y-2.5"></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Transaction History -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
-        <h3 class="font-bold text-sm text-slate-900 mb-3">최근 금융 거래 내역</h3>
-        <div id="transactionLog" class="space-y-2 max-h-56 overflow-y-auto custom-scroll text-xs"></div>
+      <!-- Teacher/Admin Quick Payroll Strip (Minimal) -->
+      <div id="teacherQuickBar" class="bg-white rounded-2xl border border-zinc-200/90 p-5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-6">
+          <div>
+            <div class="text-[11px] text-zinc-400">학급 총 통화량</div>
+            <div id="dashTotalMoney" class="text-base font-extrabold text-zinc-900">0</div>
+          </div>
+          <div class="h-7 w-px bg-zinc-200"></div>
+          <div>
+            <div class="text-[11px] text-zinc-400">재적 인원</div>
+            <div id="dashStudentCount" class="text-base font-extrabold text-zinc-900">0명</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="switchTab('manage')" class="px-3.5 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-xs font-bold text-zinc-700">
+            개별 급여·명단 관리
+          </button>
+          <button id="payAllBtn" onclick="payAllSalaries()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 text-white text-xs font-bold transition">
+            전원 월급 일괄 지급
+          </button>
+        </div>
       </div>
     </section>
 
-    <!-- 2. 3D METAVERSE CLASSROOM TAB -->
+    <!-- ==================== TAB 2: 3D METAVERSE CLASSROOM ==================== -->
     <section id="tab-metaverse" class="tab-section hidden space-y-4">
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div class="bg-white p-4 rounded-2xl border border-zinc-200/90 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="font-bold text-base text-slate-900 flex items-center gap-2">
-            3D 메타버스 교실 광장
-            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Three.js 3D</span>
-          </h2>
-          <p class="text-xs text-slate-500 mt-0.5">
-            <b>방향키(↑↓←→) / WASD</b> 또는 <b>교실 바닥 클릭</b>으로 이동 · 의자 근처에서 <b>앉기/일어서기(E키)</b> · 친구들과 실시간 인사!
-          </p>
+          <h2 class="font-extrabold text-sm text-zinc-900">3D 교실 광장</h2>
+          <p class="text-xs text-zinc-500">방향키(WASD) 또는 바닥 클릭으로 이동 · 의자 근처에서 <b>앉기/일어서기(E)</b></p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button id="sitStandBtn" onclick="toggleSitStand()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5">
-            <i data-lucide="armchair" class="w-4 h-4"></i> <span id="sitStandText">가까운 의자에 앉기 (E)</span>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSitStand()" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition">
+            <span id="sitStandText">가까운 의자에 앉기 (E)</span>
           </button>
-          <button onclick="resetCameraView()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
-            시점 초기화
-          </button>
+          <button onclick="resetCameraView()" class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold">시점 초기화</button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div class="lg:col-span-3 bg-slate-900 rounded-2xl p-2 shadow-sm relative">
-          <div id="threeContainer" class="w-full h-[500px] relative overflow-hidden"></div>
-          <!-- Floating speech bubble overlay -->
-          <div id="metaverseStatusOverlay" class="absolute top-4 left-4 bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-800 shadow">
-            상태: 교실 산책 중
+        <div class="lg:col-span-3 bg-zinc-900 rounded-2xl p-1.5 relative">
+          <div id="threeContainer" class="w-full h-[480px] relative overflow-hidden"></div>
+          <div id="metaverseStatusOverlay" class="absolute top-4 left-4 bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-800">
+            교실 산책 중
           </div>
           <div class="absolute bottom-4 left-4 right-4 flex gap-2">
-            <input id="chatInput" type="text" placeholder="교실 친구들에게 할 말을 입력하세요 (예: 안녕! 오늘 미션 했어?)" onkeydown="if(event.key==='Enter') sendMetaverseChat()" class="flex-1 bg-white/95 backdrop-blur-xs text-sm px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none shadow" />
-            <button onclick="sendMetaverseChat()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow">
-              말풍선 띄우기
-            </button>
+            <input id="chatInput" type="text" placeholder="교실 친구들에게 말풍선 보내기..." onkeydown="if(event.key==='Enter') sendMetaverseChat()" class="flex-1 bg-white/95 text-xs px-3.5 py-2.5 rounded-xl border border-zinc-200 focus:outline-none" />
+            <button onclick="sendMetaverseChat()" class="px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-xl">전송</button>
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between space-y-4">
+        <div class="bg-white rounded-2xl border border-zinc-200/90 p-4 flex flex-col justify-between">
           <div>
-            <h3 class="font-bold text-sm text-slate-900 mb-2">교실 접속 학생 목록</h3>
-            <p class="text-xs text-slate-500 mb-3">상점에서 구매한 모자·안경·의상이 3D 아바타에 반영됩니다.</p>
-            <div id="metaverseRoster" class="space-y-2 max-h-72 overflow-y-auto custom-scroll"></div>
+            <h3 class="font-bold text-xs text-zinc-400 uppercase tracking-wider mb-3">접속 중인 친구들</h3>
+            <div id="metaverseRoster" class="space-y-2 max-h-80 overflow-y-auto custom-scroll"></div>
           </div>
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
-            <div class="font-bold text-slate-700">조작 가이드</div>
-            <div class="text-slate-600">• 이동: W, A, S, D 또는 화살표 키</div>
-            <div class="text-slate-600">• 마우스 클릭: 클릭한 바닥 위치로 이동</div>
-            <div class="text-slate-600">• 앉기/일어서기: 책상 의자 근처에서 E키</div>
+          <div class="text-[11px] text-zinc-400 pt-3 border-t border-zinc-100">
+            * 내 캐릭터의 의상·안경·반려동물이 3D 아바타에 반영됩니다.
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. INVESTMENT & DAILY MORNING NEWS TAB -->
-    <section id="tab-invest" class="tab-section hidden space-y-6">
-      <!-- Daily Morning Financial News Banner -->
-      <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-5 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-extrabold">매일 아침 경제 뉴스</span>
-            <span id="newsDayLabel" class="text-xs text-indigo-200 font-semibold">Day 1 아침 브리핑</span>
-          </div>
-          <button onclick="advanceMorningNews()" class="px-3.5 py-1.5 rounded-xl bg-white text-slate-900 hover:bg-indigo-50 text-xs font-bold transition flex items-center gap-1.5">
-            <i data-lucide="sunrise" class="w-4 h-4 text-amber-500"></i> 다음 날 아침 (새 뉴스 & 시세 반영)
+    <!-- ==================== TAB 3: INVESTMENT & MORNING NEWS ==================== -->
+    <section id="tab-invest" class="tab-section hidden space-y-5">
+      <!-- Morning News -->
+      <div class="bg-white rounded-2xl border border-zinc-200/90 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <span id="newsDayLabel" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-zinc-900 text-white">Day 1 아침 경제 뉴스</span>
+          <button onclick="advanceMorningNews()" class="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition flex items-center gap-1">
+            <i data-lucide="sunrise" class="w-3.5 h-3.5"></i> 다음 날 아침 (새 뉴스 & 시세 반영)
           </button>
         </div>
-        <h2 id="morningNewsTitle" class="text-lg font-extrabold tracking-tight"></h2>
-        <p id="morningNewsBody" class="text-sm text-slate-200 mt-1 leading-relaxed"></p>
+        <h2 id="morningNewsTitle" class="text-lg font-extrabold text-zinc-900 mt-2"></h2>
+        <p id="morningNewsBody" class="text-xs text-zinc-600 mt-1.5 leading-relaxed"></p>
         <div id="morningNewsImpact" class="mt-3 flex flex-wrap gap-2 text-xs"></div>
       </div>
 
-      <!-- Student Portfolio Summary -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <span class="text-xs text-slate-500">투자자 계정:</span>
-          <span id="investUserLabel" class="font-bold text-sm text-slate-900 ml-1">-</span>
-        </div>
-        <div class="flex flex-wrap gap-6 text-sm">
-          <div>보유 현금: <b id="investCash" class="text-slate-900">0</b></div>
-          <div>총 평가금액: <b id="investEvalTotal" class="text-indigo-600">0</b></div>
-          <div>총 평가손익: <b id="investProfitTotal" class="text-emerald-600">0</b></div>
+      <!-- Portfolio Strip -->
+      <div class="bg-white px-5 py-3.5 rounded-2xl border border-zinc-200/90 flex flex-wrap items-center justify-between gap-4 text-xs">
+        <div>투자 계정: <b id="investUserLabel" class="text-zinc-900">-</b></div>
+        <div class="flex gap-5">
+          <span>보유 현금: <b id="investCash" class="text-zinc-900">0</b></span>
+          <span>총 평가액: <b id="investEvalTotal" class="text-emerald-600">0</b></span>
         </div>
       </div>
 
-      <!-- 4 Asset Cards: Gold, Stock, Bond, Coin -->
+      <!-- 4 Asset Cards -->
       <div id="assetCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
-    <!-- 4. MISSIONS TAB -->
-    <section id="tab-missions" class="tab-section hidden space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200">
-        <div>
-          <h2 class="font-bold text-base text-slate-900">학급 미션 게시판 (아침 미션 · 교실 미션)</h2>
-          <p class="text-xs text-slate-500 mt-0.5">교사가 등록한 미션을 수행하고 승인받으면 보너스 급여가 즉시 지급됩니다.</p>
-        </div>
-        <button id="openMissionModalBtn" onclick="openNewMissionModal()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
-          + 새 미션 등록 (교사)
-        </button>
-      </div>
-
-      <div id="missionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </section>
-
-    <!-- 5. JOBS & SALARY TAB -->
-    <section id="tab-jobs" class="tab-section hidden space-y-6">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 class="font-bold text-base text-slate-900">학급 직업 관리 (기본 30종 + 커스텀 직업)</h2>
-          <p class="text-xs text-slate-500 mt-0.5">각 직업의 급여를 직접 수정하거나 새로운 직업을 추가할 수 있습니다. 학생에게 직업을 배정하면 역할과 급여가 자동 연동됩니다.</p>
-        </div>
-        <button onclick="openNewJobModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition">
-          + 새 직업 추가하기
-        </button>
-      </div>
-
-      <div id="jobsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </section>
-
-    <!-- 6. STUDENTS & EXCEL UPLOAD TAB -->
-    <section id="tab-students" class="tab-section hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
-          <h2 class="font-bold text-base text-slate-900">엑셀(.xlsx / .csv) 학생 명단 일괄 등록</h2>
-          <p class="text-xs text-slate-500">열 이름에 <b>번호, 이름, 직업(선택)</b>이 포함된 엑셀 파일을 업로드하면 현재 학급에 명단이 등록됩니다.</p>
-          <div class="flex flex-wrap items-center gap-2 pt-1">
-            <button onclick="downloadSampleExcel()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition">
-              샘플 엑셀 양식 다운로드
-            </button>
-            <label class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer transition">
-              엑셀 파일 선택 및 업로드
-              <input type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)" class="hidden" />
-            </label>
+    <!-- ==================== TAB 4: SHOP & AVATAR CUSTOMIZATION ==================== -->
+    <section id="tab-shop" class="tab-section hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Pixel Character Studio -->
+        <div class="lg:col-span-4 bg-white rounded-2xl border border-zinc-200/90 p-6 flex flex-col items-center text-center space-y-4">
+          <div class="w-full flex items-center justify-between">
+            <h2 class="font-extrabold text-sm text-zinc-900">내 아바타 스튜디오</h2>
+            <span id="shopUserBalance" class="text-xs font-extrabold text-emerald-600">0</span>
           </div>
-        </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
-          <h2 class="font-bold text-base text-slate-900">개별 학생 추가</h2>
-          <div class="grid grid-cols-3 gap-2">
-            <input id="newStudentNum" type="number" placeholder="번호 (예: 9)" class="px-3 py-2 text-xs rounded-xl border border-slate-200" />
-            <input id="newStudentName" type="text" placeholder="이름 (예: 정하윤)" class="px-3 py-2 text-xs rounded-xl border border-slate-200" />
-            <select id="newStudentJob" class="px-2 py-2 text-xs rounded-xl border border-slate-200"></select>
+          <div class="w-44 h-52 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center">
+            <canvas id="shopAvatarCanvas" width="128" height="160" class="pixel-art w-36 h-44"></canvas>
           </div>
-          <button onclick="addSingleStudent()" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
-            학생 등록하기
-          </button>
-        </div>
-      </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 font-bold text-sm text-slate-900">학급 명단 및 직업·관리자 권한 배정</div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50 text-xs text-slate-500 uppercase">
-              <tr>
-                <th class="py-3 px-4">번호</th>
-                <th class="py-3 px-4">이름</th>
-                <th class="py-3 px-4">직업 선택 (역할 연동)</th>
-                <th class="py-3 px-4">연동된 역할 설명</th>
-                <th class="py-3 px-4">관리자(급여지급) 권한</th>
-                <th class="py-3 px-4 text-right">관리</th>
-              </tr>
-            </thead>
-            <tbody id="studentManageTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. SEATING CHART TAB -->
-    <section id="tab-seating" class="tab-section hidden space-y-5">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 class="font-bold text-base text-slate-900">교실 자리 배치도 (교사 조정 가능)</h2>
-          <p class="text-xs text-slate-500 mt-0.5">두 학생 카드를 차례로 클릭하거나 드래그 앤 드롭하여 자리를 맞바꿀 수 있습니다.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <label class="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-            가로 열 수:
-            <select id="seatColsSelect" onchange="changeSeatCols(this.value)" class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold">
-              <option value="3">3열</option>
-              <option value="4" selected>4열</option>
-              <option value="5">5열</option>
-              <option value="6">6열</option>
-            </select>
-          </label>
-          <button onclick="sortSeatsByNumber()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">번호순 정렬</button>
-          <button onclick="shuffleSeats()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white">랜덤 자리 뽑기</button>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl border border-slate-200">
-        <div class="max-w-md mx-auto mb-8 py-2.5 bg-emerald-800 text-white text-center font-bold text-sm rounded-xl shadow-inner border-4 border-amber-800">
-          칠 판 (교 탁)
-        </div>
-        <div id="seatingGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto"></div>
-      </div>
-    </section>
-
-    <!-- 8. SHOP & AVATAR CUSTOMIZATION TAB -->
-    <section id="tab-shop" class="tab-section hidden space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Avatar Preview & Equipped Items -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
-          <h2 class="font-bold text-base text-slate-900">내 아바타 꾸미기 미리보기</h2>
-          <div id="avatarPreviewBox" class="h-52 rounded-2xl bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center relative border border-slate-200">
-            <div id="avatarHatPreview" class="text-3xl -mb-2 z-10 h-8"></div>
-            <div id="avatarBodyPreview" class="w-20 h-20 rounded-full bg-amber-200 border-4 border-white shadow flex items-center justify-center text-2xl relative">
-              <span id="avatarFacePreview">😊</span>
-              <span id="avatarGlassesPreview" class="absolute text-xl"></span>
-            </div>
-            <div id="avatarShirtPreview" class="w-24 h-10 rounded-t-2xl bg-indigo-500 -mt-2 flex items-center justify-center text-[11px] font-bold text-white shadow">
-              기본 의상
-            </div>
-          </div>
-          <div class="text-xs text-slate-600 space-y-1">
-            <div>보유 잔액: <b id="shopUserBalance" class="text-emerald-600 text-sm">0</b></div>
-            <div class="text-slate-400">* 구매한 아바타 아이템은 3D 교실 광장 캐릭터에도 즉시 적용됩니다.</div>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-slate-700 mb-2">보유 인벤토리 (클릭하여 장착/해제)</div>
+          <div class="w-full text-left space-y-2">
+            <div class="text-xs font-bold text-zinc-700">보유 아이템 장착/해제</div>
             <div id="userInventoryList" class="flex flex-wrap gap-1.5"></div>
           </div>
         </div>
 
-        <!-- Shop Catalog -->
-        <div class="lg:col-span-2 space-y-4">
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <!-- Minimal Shop Items -->
+        <div class="lg:col-span-8 space-y-4">
+          <div class="bg-white p-5 rounded-2xl border border-zinc-200/90 flex items-center justify-between">
             <div>
-              <h2 class="font-bold text-base text-slate-900">학급 상점 (간식 · 티켓 · 학용품 · 아바타)</h2>
-              <p class="text-xs text-slate-500">관리자(교사)는 판매 품목을 자유롭게 추가하거나 삭제할 수 있습니다.</p>
+              <h2 class="font-extrabold text-sm text-zinc-900">학급 상점</h2>
+              <p class="text-xs text-zinc-400">간식, 특권 티켓, 학용품 및 픽셀 아바타 코디 아이템</p>
             </div>
-            <button onclick="openNewShopItemModal()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
-              + 상점 품목 추가
-            </button>
+            <button onclick="openNewShopItemModal()" class="px-3.5 py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold">+ 품목 추가</button>
           </div>
-          <div id="shopItemsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          <div id="shopItemsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: UNIFIED CLASS MANAGEMENT (SUB-PILLS) ==================== -->
+    <section id="tab-manage" class="tab-section hidden space-y-5">
+      <!-- Sub-navigation Pills -->
+      <div class="bg-white p-2 rounded-2xl border border-zinc-200/90 inline-flex flex-wrap gap-1">
+        <button onclick="switchManageSubTab('payroll')" data-sub="payroll" class="sub-btn bg-zinc-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition">급여 지급 · 거래내역</button>
+        <button onclick="switchManageSubTab('students')" data-sub="students" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">학생 명단 · 엑셀 등록</button>
+        <button onclick="switchManageSubTab('jobs')" data-sub="jobs" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">직업 설정 (30종+)</button>
+        <button onclick="switchManageSubTab('seating')" data-sub="seating" class="sub-btn text-zinc-500 hover:bg-zinc-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">자리 배치도</button>
+      </div>
+
+      <!-- Sub 1: Payroll & Logs -->
+      <div id="sub-payroll" class="sub-section space-y-5">
+        <div class="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden">
+          <div class="p-5 border-b border-zinc-100 flex items-center justify-between">
+            <div>
+              <h3 class="font-extrabold text-sm text-zinc-900">학생별 급여 지급 및 잔액 현황</h3>
+              <p class="text-xs text-zinc-400">교사 또는 은행원 권한이 있는 학생만 급여를 지급할 수 있습니다.</p>
+            </div>
+            <button onclick="payAllSalaries()" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">전원 월급 지급</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-zinc-50 text-zinc-400 uppercase">
+                <tr>
+                  <th class="py-3 px-4">번호</th>
+                  <th class="py-3 px-4">이름</th>
+                  <th class="py-3 px-4">직업</th>
+                  <th class="py-3 px-4">기본 급여</th>
+                  <th class="py-3 px-4">보유 잔액</th>
+                  <th class="py-3 px-4 text-right">지급</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardTableBody" class="divide-y divide-zinc-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-zinc-200/90 p-5">
+          <h3 class="font-bold text-xs text-zinc-500 mb-3">최근 거래 기록</h3>
+          <div id="transactionLog" class="space-y-1.5 max-h-48 overflow-y-auto custom-scroll text-xs"></div>
+        </div>
+      </div>
+
+      <!-- Sub 2: Students & Excel -->
+      <div id="sub-students" class="sub-section hidden space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-zinc-200/90 space-y-3">
+            <h3 class="font-bold text-sm text-zinc-900">엑셀 명단 일괄 업로드</h3>
+            <p class="text-xs text-zinc-400">열 이름: <b>번호, 이름, 직업</b></p>
+            <div class="flex gap-2">
+              <button onclick="downloadSampleExcel()" class="px-3 py-2 rounded-xl bg-zinc-100 text-zinc-800 text-xs font-bold">샘플 양식</button>
+              <label class="px-3 py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold cursor-pointer">
+                엑셀 파일 선택
+                <input type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)" class="hidden" />
+              </label>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-zinc-200/90 space-y-3">
+            <h3 class="font-bold text-sm text-zinc-900">학생 개별 추가</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <input id="newStudentNum" type="number" placeholder="번호" class="px-3 py-2 text-xs rounded-xl border border-zinc-200" />
+              <input id="newStudentName" type="text" placeholder="이름" class="px-3 py-2 text-xs rounded-xl border border-zinc-200" />
+              <select id="newStudentJob" class="px-2 py-2 text-xs rounded-xl border border-zinc-200"></select>
+            </div>
+            <button onclick="addSingleStudent()" class="w-full py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold">등록</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-zinc-50 text-zinc-400 uppercase">
+              <tr>
+                <th class="py-3 px-4">번호</th>
+                <th class="py-3 px-4">이름</th>
+                <th class="py-3 px-4">직업 배정</th>
+                <th class="py-3 px-4">역할 설명</th>
+                <th class="py-3 px-4">은행원 권한</th>
+                <th class="py-3 px-4 text-right">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="studentManageTableBody" class="divide-y divide-zinc-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sub 3: Jobs (30+) -->
+      <div id="sub-jobs" class="sub-section hidden space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-zinc-200/90 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-sm text-zinc-900">직업 및 급여 설정 (기본 30종 + 추가 가능)</h3>
+            <p class="text-xs text-zinc-400">급여를 수정하면 해당 직업을 가진 학생에게 즉시 반영됩니다.</p>
+          </div>
+          <button onclick="openNewJobModal()" class="px-3.5 py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold">+ 새 직업 추가</button>
+        </div>
+        <div id="jobsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3.5"></div>
+      </div>
+
+      <!-- Sub 4: Seating Chart -->
+      <div id="sub-seating" class="sub-section hidden space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-zinc-200/90 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-bold text-sm text-zinc-900">교실 자리 배치도</h3>
+            <p class="text-xs text-zinc-400">카드를 클릭하거나 드래그하여 자리를 맞바꾸세요.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="seatColsSelect" onchange="changeSeatCols(this.value)" class="border border-zinc-200 rounded-xl px-2.5 py-1.5 text-xs font-bold">
+              <option value="3">3열</option>
+              <option value="4" selected>4열</option>
+              <option value="5">5열</option>
+            </select>
+            <button onclick="sortSeatsByNumber()" class="px-3 py-1.5 rounded-xl bg-zinc-100 text-xs font-bold">번호순</button>
+            <button onclick="shuffleSeats()" class="px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-xs font-bold">랜덤 배치</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-zinc-200/90">
+          <div class="max-w-sm mx-auto mb-8 py-2 bg-zinc-800 text-white text-center font-bold text-xs rounded-lg">칠 판</div>
+          <div id="seatingGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 max-w-3xl mx-auto"></div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Modals -->
-  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4">
+  <!-- Modal -->
+  <div id="modalBackdrop" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-2xs hidden items-center justify-center z-50 p-4">
     <div id="modalContent" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4"></div>
   </div>
 
   <script>
+    // ==================== PIXEL AVATAR RENDERER (MAPLE-STYLE CHIBI) ====================
+    function drawMaplePixelAvatar(canvas, equipped = {}) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Scale factor: 32x40 pixel grid rendered onto 128x160 canvas (4x zoom)
+      const s = 4;
+      const px = (x, y, w, h, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * s, y * s, w * s, h * s);
+      };
+
+      const shirtColor = equipped.shirtColor || '#881337'; // Deep burgundy baseball jersey style
+      const shirtHighlight = equipped.shirtColor === '#eab308' ? '#fde047' : (equipped.shirtColor === '#1e3a8a' ? '#3b82f6' : '#be123c');
+      const hasGlasses = equipped.glasses !== '';
+      const hatType = equipped.hat || '';
+      const hasPet = equipped.pet !== '';
+
+      // Ground Shadow
+      px(9, 37, 14, 2, 'rgba(0,0,0,0.12)');
+
+      // White Sneakers & Black Pants
+      px(10, 35, 5, 2, '#18181b'); // shoe outline
+      px(17, 35, 5, 2, '#18181b');
+      px(10, 34, 5, 2, '#ffffff'); // white shoes
+      px(17, 34, 5, 2, '#ffffff');
+      px(11, 29, 4, 5, '#27272a'); // left leg pants
+      px(17, 29, 4, 5, '#27272a'); // right leg pants
+
+      // Jersey Torso (Burgundy / Custom Shirt)
+      px(10, 21, 12, 8, '#18181b'); // outline
+      px(11, 21, 10, 8, shirtColor);
+      px(12, 22, 8, 6, shirtHighlight);
+      // White Jersey Stripe & Button line
+      px(15, 21, 1, 8, '#ffffff');
+      px(11, 24, 10, 1, 'rgba(255,255,255,0.65)');
+
+      // Arms & Hands
+      px(8, 22, 3, 6, shirtColor);
+      px(21, 22, 3, 6, shirtColor);
+      px(8, 27, 2, 3, '#fde68a'); // left hand
+      px(22, 27, 2, 3, '#fde68a'); // right hand
+      px(21, 26, 3, 1, '#ffffff'); // white wristband
+
+      // Head Base (Chibi Large Head with Dark Outline)
+      px(8, 6, 16, 14, '#18181b');
+      px(9, 7, 14, 12, '#fef3c7'); // warm fair skin
+      px(10, 18, 12, 1, '#fde68a'); // chin shade
+      // Ears
+      px(7, 13, 2, 3, '#18181b');
+      px(23, 13, 2, 3, '#18181b');
+      px(8, 13, 1, 3, '#fde68a');
+      px(23, 13, 1, 3, '#fde68a');
+
+      // Black Parted Hair (Comma / Center-part style)
+      px(8, 4, 16, 5, '#18181b');
+      px(7, 6, 18, 6, '#18181b');
+      px(9, 5, 14, 3, '#27272a'); // hair highlight
+      // Fringe bangs
+      px(8, 10, 3, 3, '#18181b');
+      px(13, 9, 2, 2, '#18181b');
+      px(17, 9, 2, 2, '#18181b');
+      px(21, 10, 3, 3, '#18181b');
+
+      // Eyebrows & Expressive Chibi Eyes
+      px(10, 11, 3, 1, '#18181b');
+      px(19, 11, 3, 1, '#18181b');
+      // Eyes
+      px(10, 13, 3, 3, '#27272a');
+      px(19, 13, 3, 3, '#27272a');
+      px(10, 13, 1, 1, '#ffffff'); // eye sparkle
+      px(19, 13, 1, 1, '#ffffff');
+      // Subtle Blush & Mouth
+      px(9, 16, 2, 1, '#fca5a5');
+      px(21, 16, 2, 1, '#fca5a5');
+      px(15, 17, 2, 1, '#78350f');
+
+      // Round Wire Glasses (Default or Equipped)
+      if (hasGlasses) {
+        px(9, 12, 5, 1, '#3f3f46');
+        px(9, 16, 5, 1, '#3f3f46');
+        px(9, 12, 1, 5, '#3f3f46');
+        px(13, 12, 1, 5, '#3f3f46');
+        px(14, 14, 4, 1, '#3f3f46'); // bridge
+        px(18, 12, 5, 1, '#3f3f46');
+        px(18, 16, 5, 1, '#3f3f46');
+        px(18, 12, 1, 5, '#3f3f46');
+        px(22, 12, 1, 5, '#3f3f46');
+      }
+
+      // Hat Accessory
+      if (hatType === '👑') {
+        px(11, 1, 10, 3, '#facc15');
+        px(11, 0, 2, 1, '#facc15');
+        px(15, 0, 2, 1, '#facc15');
+        px(19, 0, 2, 1, '#facc15');
+        px(15, 2, 2, 1, '#ef4444');
+      } else if (hatType === '🧢') {
+        px(9, 3, 14, 3, '#2563eb');
+        px(14, 5, 11, 1, '#1d4ed8');
+      }
+
+      // Cute Grey Cat Doll / Pet next to hand (matching reference image!)
+      if (hasPet) {
+        px(23, 29, 7, 7, '#18181b'); // outline
+        px(24, 30, 5, 5, '#71717a'); // grey plush body
+        px(24, 28, 2, 2, '#71717a'); // left ear
+        px(27, 28, 2, 2, '#71717a'); // right ear
+        px(25, 28, 3, 1, '#f9a8d4'); // pink ribbon bow
+        px(25, 31, 1, 1, '#18181b'); // cat eye
+        px(28, 31, 1, 1, '#18181b');
+      }
+    }
+
     // ==================== 30 DEFAULT CLASSROOM JOBS ====================
     const DEFAULT_30_JOBS = [
       { id: 'j1', title: '은행원', salary: 1500, desc: '학급 화폐 입출금 및 급여 지급 보조' },
       { id: 'j2', title: '학급 회장', salary: 1600, desc: '학급 회의 진행 및 선생님 전달 사항 안내' },
       { id: 'j3', title: '학급 부회장', salary: 1400, desc: '학급 회장 보좌 및 줄 세우기 질서 지도' },
-      { id: 'j4', title: '칠판 지킴이', salary: 1100, desc: '수업 종료 후 칠판 지우기 및 분필/보드마카 정리' },
+      { id: 'j4', title: '칠판 지킴이', salary: 1100, desc: '수업 종료 후 칠판 지우기 및 분필 정리' },
       { id: 'j5', title: '에너지 보안관', salary: 1100, desc: '이동 수업 시 전등, 에어컨, TV 전원 끄기' },
       { id: 'j6', title: '우유 급식 도우미', salary: 1200, desc: '아침 우유 배부 및 빈 우유팩 분리수거' },
       { id: 'j7', title: '점심 급식 도우미', salary: 1300, desc: '급식실 질서 유지 및 잔반 줄이기 캠페인' },
@@ -418,7 +543,7 @@
       { id: 'j15', title: '미소 칭찬 기자', salary: 1200, desc: '우리 반 선행 사례 발굴 및 칭찬 게시판 기록' },
       { id: 'j16', title: '식물 정원사', salary: 1100, desc: '교실 화분 물주기 및 잎사귀 돌보기' },
       { id: 'j17', title: '분실물 센터장', salary: 1100, desc: '주인 없는 학용품 보관 및 주인 찾아주기' },
-      { id: 'j18', title: '복도 안전 지킴이', salary: 1200, desc: '쉬는 시간 복도 우측보행 안내 및 뛰지 않기 지도' },
+      { id: 'j18', title: '복도 안전 지킴이', salary: 1200, desc: '쉬는 시간 복도 우측보행 안내 및 질서 지도' },
       { id: 'j19', title: '학습 준비물 매니저', salary: 1200, desc: '미술·과학 시간 준비물 배부 및 수거' },
       { id: 'j20', title: '기상 캐스터', salary: 1100, desc: '아침 조회 시 오늘 날씨와 미세먼지 안내' },
       { id: 'j21', title: '뉴스 앵커', salary: 1300, desc: '매일 아침 경제·시사 뉴스 브리핑 낭독' },
@@ -433,11 +558,10 @@
       { id: 'j30', title: '인턴 수습사원', salary: 800, desc: '새로운 직업을 탐색하며 학급 일손 돕기' }
     ];
 
-    // ==================== MORNING FINANCIAL NEWS SCENARIOS ====================
     const NEWS_SCENARIOS = [
       {
         title: "중앙은행 기준금리 인하 발표! 기술주와 코인 시장 들썩",
-        body: "중앙은행이 경기 활성화를 위해 기준금리를 0.25%p 낮추기로 결정했습니다. 기업들의 대출 이자 부담이 줄어들면서 주식과 코인 가격이 상승하고, 기존 채권 가격도 소폭 올랐습니다.",
+        body: "중앙은행이 경기 활성화를 위해 기준금리를 0.25%p 낮추기로 결정했습니다. 기업들의 대출 이자 부담이 줄어들면서 주식과 코인 가격이 상승하고, 채권 가격도 소폭 올랐습니다.",
         changes: { gold: -0.01, stock: 0.08, bond: 0.03, coin: 0.15 }
       },
       {
@@ -454,19 +578,15 @@
         title: "가상자산 보안 규제 강화 소식에 코인 시장 출렁",
         body: "각국 금융당국이 가상자산 거래소 보안 기준을 대폭 강화하겠다고 발표했습니다. 코인 가격이 단기 급락한 반면, 안정적인 이자를 주는 채권과 금으로 자금이 이동하고 있습니다.",
         changes: { gold: 0.04, stock: -0.02, bond: 0.04, coin: -0.22 }
-      },
-      {
-        title: "친환경·미래 산업 대규모 투자 협약 체결",
-        body: "정부와 대기업이 미래 친환경 에너지 및 로봇 분야에 대규모 투자를 약속했습니다. 관련 기업들의 실적 기대감으로 주식과 코인이 동반 상승했습니다.",
-        changes: { gold: -0.02, stock: 0.07, bond: 0.01, coin: 0.12 }
       }
     ];
 
-    // ==================== STATE MANAGEMENT ====================
+    // ==================== STATE ====================
     let state = {
       activeClassId: 'class-1',
-      activeUserId: 'teacher',
-      activeTab: 'dashboard',
+      activeUserId: 's1', // Default to student first view so user immediately sees student dashboard!
+      activeTab: 'home',
+      activeManageSub: 'payroll',
       seatCols: 4,
       selectedSeatStudentId: null,
       classes: [
@@ -478,96 +598,76 @@
           newsIndex: 0,
           jobs: JSON.parse(JSON.stringify(DEFAULT_30_JOBS)),
           assets: [
-            {
-              id: 'gold', name: '순금 (Gold)', price: 1000, prevPrice: 1000, risk: '낮음 (안전 자산)',
-              caution: '금은 위기 상황에서도 가치가 잘 유지되는 안전 자산이지만, 단기간에 폭발적인 수익률을 기대하기는 어렵습니다.'
-            },
-            {
-              id: 'stock', name: '우리반 성장주식 (ETF)', price: 500, prevPrice: 500, risk: '중간 (성장 자산)',
-              caution: '기업의 성장에 따라 배당과 시세 차익을 얻을 수 있으나, 경기 침체나 실적 부진 시 원금 손실이 발생할 수 있습니다.'
-            },
-            {
-              id: 'bond', name: '대한민국 국채 (채권)', price: 300, prevPrice: 300, risk: '매우 낮음 (이자 자산)',
-              caution: '나라에 돈을 빌려주고 약속된 이자를 받는 상품으로 매우 안정적이지만, 금리가 급등하면 채권 가격이 소폭 내릴 수 있습니다.'
-            },
-            {
-              id: 'coin', name: '디지털 코인 (가상자산)', price: 400, prevPrice: 400, risk: '매우 높음 (고위험 자산)',
-              caution: '하루에도 가격 변동폭이 매우 큽니다. 큰 수익이 날 수도 있지만 원금의 절반 이상을 잃을 수 있으므로 여유 자금으로만 신중히 투자해야 합니다.'
-            }
+            { id: 'gold', name: '순금 (Gold)', price: 1000, prevPrice: 1000, risk: '안전 자산', caution: '금은 위기에도 가치가 잘 유지되는 안전 자산이지만, 단기간에 높은 수익률을 기대하긴 어렵습니다.' },
+            { id: 'stock', name: '성장주식 (ETF)', price: 500, prevPrice: 500, risk: '성장 자산', caution: '기업의 성장에 따라 수익을 얻을 수 있으나, 경기 침체 시 원금 손실이 발생할 수 있습니다.' },
+            { id: 'bond', name: '대한민국 국채 (채권)', price: 300, prevPrice: 300, risk: '이자 자산', caution: '나라에 돈을 빌려주고 약속된 이자를 받는 상품으로 안정적이지만, 금리 상승 시 가격이 소폭 내릴 수 있습니다.' },
+            { id: 'coin', name: '디지털 코인', price: 400, prevPrice: 400, risk: '초고위험 자산', caution: '가격 변동폭이 매우 큽니다. 큰 수익이 날 수도 있지만 원금의 절반 이상을 잃을 수 있으므로 신중해야 합니다.' }
           ],
           students: [
-            { id: 's1', num: 1, name: '김민준', jobId: 'j1', isAdmin: true, balance: 3500, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: ['item-hat1'], equipped: { hat: '👑', glasses: '', shirtColor: '#4f46e5', shirtName: '왕관 세트' }, x: -3.5, z: -1.5, isSitting: false, chat: '' },
-            { id: 's2', num: 2, name: '이서윤', jobId: 'j2', isAdmin: false, balance: 3200, portfolio: { gold: 0, stock: 3, bond: 2, coin: 1 }, inventory: ['item-glass1'], equipped: { hat: '', glasses: '🕶️', shirtColor: '#059669', shirtName: '기본 의상' }, x: -1.2, z: -1.5, isSitting: false, chat: '' },
-            { id: 's3', num: 3, name: '박도윤', jobId: 'j9', isAdmin: false, balance: 2800, portfolio: { gold: 1, stock: 1, bond: 0, coin: 2 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#dc2626', shirtName: '기본 의상' }, x: 1.2, z: -1.5, isSitting: false, chat: '' },
-            { id: 's4', num: 4, name: '최지우', jobId: 'j21', isAdmin: false, balance: 3100, portfolio: { gold: 2, stock: 0, bond: 3, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#d97706', shirtName: '기본 의상' }, x: 3.5, z: -1.5, isSitting: false, chat: '' },
-            { id: 's5', num: 5, name: '정예준', jobId: 'j10', isAdmin: false, balance: 2600, portfolio: { gold: 0, stock: 2, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#7c3aed', shirtName: '기본 의상' }, x: -3.5, z: 1.2, isSitting: false, chat: '' },
-            { id: 's6', num: 6, name: '강하은', jobId: 'j8', isAdmin: false, balance: 2900, portfolio: { gold: 1, stock: 1, bond: 2, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#db2777', shirtName: '기본 의상' }, x: -1.2, z: 1.2, isSitting: false, chat: '' },
-            { id: 's7', num: 7, name: '조시우', jobId: 'j12', isAdmin: false, balance: 2500, portfolio: { gold: 0, stock: 1, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#0284c7', shirtName: '기본 의상' }, x: 1.2, z: 1.2, isSitting: false, chat: '' },
-            { id: 's8', num: 8, name: '윤서아', jobId: 'j15', isAdmin: false, balance: 3000, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#0d9488', shirtName: '기본 의상' }, x: 3.5, z: 1.2, isSitting: false, chat: '' }
+            { id: 's1', num: 1, name: '김민준', jobId: 'j1', isAdmin: true, balance: 3500, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: ['item-glass1', 'item-pet1'], equipped: { hat: '', glasses: '👓', shirtColor: '#881337', pet: '🐱' }, x: -3.5, z: -1.5, isSitting: false, chat: '' },
+            { id: 's2', num: 2, name: '이서윤', jobId: 'j2', isAdmin: false, balance: 3200, portfolio: { gold: 0, stock: 3, bond: 2, coin: 1 }, inventory: ['item-hat1'], equipped: { hat: '👑', glasses: '👓', shirtColor: '#1e3a8a', pet: '' }, x: -1.2, z: -1.5, isSitting: false, chat: '' },
+            { id: 's3', num: 3, name: '박도윤', jobId: 'j9', isAdmin: false, balance: 2800, portfolio: { gold: 1, stock: 1, bond: 0, coin: 2 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#065f46', pet: '' }, x: 1.2, z: -1.5, isSitting: false, chat: '' },
+            { id: 's4', num: 4, name: '최지우', jobId: 'j21', isAdmin: false, balance: 3100, portfolio: { gold: 2, stock: 0, bond: 3, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '👓', shirtColor: '#92400e', pet: '' }, x: 3.5, z: -1.5, isSitting: false, chat: '' },
+            { id: 's5', num: 5, name: '정예준', jobId: 'j10', isAdmin: false, balance: 2600, portfolio: { gold: 0, stock: 2, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#4c1d95', pet: '' }, x: -3.5, z: 1.2, isSitting: false, chat: '' },
+            { id: 's6', num: 6, name: '강하은', jobId: 'j8', isAdmin: false, balance: 2900, portfolio: { gold: 1, stock: 1, bond: 2, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#831843', pet: '🐱' }, x: -1.2, z: 1.2, isSitting: false, chat: '' },
+            { id: 's7', num: 7, name: '조시우', jobId: 'j12', isAdmin: false, balance: 2500, portfolio: { gold: 0, stock: 1, bond: 1, coin: 1 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#1e40af', pet: '' }, x: 1.2, z: 1.2, isSitting: false, chat: '' },
+            { id: 's8', num: 8, name: '윤서아', jobId: 'j15', isAdmin: false, balance: 3000, portfolio: { gold: 1, stock: 2, bond: 1, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#115e59', pet: '' }, x: 3.5, z: 1.2, isSitting: false, chat: '' }
           ],
           shopItems: [
             { id: 'item-snack1', category: '간식', name: '달콤 마이쮸 2개 교환권', price: 800, icon: '🍬', type: 'consumable' },
             { id: 'item-ticket1', category: '티켓', name: '자리 바꾸기 1회 우선권', price: 2500, icon: '🎫', type: 'consumable' },
             { id: 'item-ticket2', category: '티켓', name: '숙제 1회 면제권', price: 4000, icon: '🎟️', type: 'consumable' },
             { id: 'item-stationery1', category: '학용품', name: '지워지는 볼펜 세트', price: 1500, icon: '🖊️', type: 'consumable' },
-            { id: 'item-hat1', category: '아바타 꾸미기', name: '황금 왕관 모자', price: 1800, icon: '👑', type: 'avatar', slot: 'hat', value: '👑' },
-            { id: 'item-hat2', category: '아바타 꾸미기', name: '탐험가 캡모자', price: 1200, icon: '🧢', type: 'avatar', slot: 'hat', value: '🧢' },
-            { id: 'item-glass1', category: '아바타 꾸미기', name: '멋쟁이 선글라스', price: 1100, icon: '🕶️', type: 'avatar', slot: 'glasses', value: '🕶️' },
-            { id: 'item-shirt1', category: '아바타 꾸미기', name: '로열 골드 수트', price: 2000, icon: '🧥', type: 'avatar', slot: 'shirtColor', value: '#eab308' }
+            { id: 'item-pet1', category: '아바타 꾸미기', name: '리본 고양이 인형 펫', price: 1800, icon: '🐱', type: 'avatar', slot: 'pet', value: '🐱' },
+            { id: 'item-glass1', category: '아바타 꾸미기', name: '동글이 뿔테 안경', price: 900, icon: '👓', type: 'avatar', slot: 'glasses', value: '👓' },
+            { id: 'item-hat1', category: '아바타 꾸미기', name: '황금 미니 왕관', price: 1600, icon: '👑', type: 'avatar', slot: 'hat', value: '👑' },
+            { id: 'item-hat2', category: '아바타 꾸미기', name: '블루 스냅백 모자', price: 1100, icon: '🧢', type: 'avatar', slot: 'hat', value: '🧢' },
+            { id: 'item-shirt1', category: '아바타 꾸미기', name: '버건디 야구 유니폼', price: 1400, icon: '👕', type: 'avatar', slot: 'shirtColor', value: '#881337' },
+            { id: 'item-shirt2', category: '아바타 꾸미기', name: '로열 골드 재킷', price: 1900, icon: '🧥', type: 'avatar', slot: 'shirtColor', value: '#eab308' }
           ],
           missions: [
-            { id: 'm1', type: '아침 미션', title: '8시 40분 전 등교 및 아침 독서 15분 완료', reward: 300, desc: '등교 후 자리에 앉아 조용히 책을 읽고 독서록 한 줄 남기기', completedBy: ['s1', 's4'], pendingBy: ['s2'] },
-            { id: 'm2', type: '교실 미션', title: '내 자리 주변 쓰레기 줍기 및 의자 넣기', reward: 250, desc: '쉬는 시간과 하교 전 책상 서랍과 바닥을 깨끗이 정돈하기', completedBy: ['s3'], pendingBy: ['s5'] },
-            { id: 'm3', type: '특별 미션', title: '오늘의 경제 뉴스 읽고 투자 일기 쓰기', reward: 500, desc: '투자 탭의 아침 뉴스를 읽고 금·주식·채권·코인 중 하나를 분석하기', completedBy: [], pendingBy: [] }
+            { id: 'm1', type: '아침 미션', title: '8시 40분 전 등교 및 아침 독서 15분 완료', reward: 300, desc: '등교 후 자리에 앉아 조용히 책을 읽고 한 줄 기록하기', completedBy: ['s4'], pendingBy: ['s2'] },
+            { id: 'm2', type: '교실 미션', title: '내 자리 주변 정돈 및 의자 바르게 넣기', reward: 250, desc: '쉬는 시간과 하교 전 책상 서랍과 바닥 깨끗이 정돈하기', completedBy: ['s3'], pendingBy: [] },
+            { id: 'm3', type: '특별 미션', title: '오늘의 아침 뉴스 읽고 모의 투자 해보기', reward: 500, desc: '경제 뉴스를 읽고 금·주식·채권·코인 중 하나 매수하기', completedBy: [], pendingBy: [] }
           ],
           logs: [
-            '[시스템] 5학년 1반 학급 금융 시스템이 개설되었습니다.',
+            '[시스템] 5학년 1반 학급 금융 시스템이 시작되었습니다.',
             '[급여] 김민준(은행원) 학생에게 기본 급여 1,500 미소가 지급되었습니다.'
           ]
         }
       ]
     };
 
-    function saveState() {
-      try { localStorage.setItem('classFinance3D_v1', JSON.stringify(state)); } catch (e) {}
-    }
-
+    function saveState() { try { localStorage.setItem('classFinanceMinimal_v2', JSON.stringify(state)); } catch (e) {} }
     function loadState() {
       try {
-        const saved = localStorage.getItem('classFinance3D_v1');
+        const saved = localStorage.getItem('classFinanceMinimal_v2');
         if (saved) state = JSON.parse(saved);
       } catch (e) {}
     }
-
     function resetAllDemoData() {
-      if (!confirm('모든 학급 데이터를 초기 데모 상태로 되돌릴까요?')) return;
-      localStorage.removeItem('classFinance3D_v1');
+      if (!confirm('초기 데모 데이터로 되돌릴까요?')) return;
+      localStorage.removeItem('classFinanceMinimal_v2');
       location.reload();
     }
-
-    function getCurrentClass() {
-      return state.classes.find(c => c.id === state.activeClassId) || state.classes[0];
-    }
-
+    function getCurrentClass() { return state.classes.find(c => c.id === state.activeClassId) || state.classes[0]; }
     function getActiveStudent() {
-      if (state.activeUserId === 'teacher') return null;
-      return getCurrentClass().students.find(s => s.id === state.activeUserId) || null;
+      const cls = getCurrentClass();
+      if (state.activeUserId === 'teacher') return cls.students[0] || null;
+      return cls.students.find(s => s.id === state.activeUserId) || cls.students[0] || null;
     }
-
     function canManageFinance() {
       if (state.activeUserId === 'teacher') return true;
       const st = getActiveStudent();
       return st && st.isAdmin;
     }
-
     function showToast(msg) {
       const box = document.getElementById('toastBox');
       box.textContent = msg;
       box.classList.remove('hidden');
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => box.classList.add('hidden'), 3000);
+      window._toastTimer = setTimeout(() => box.classList.add('hidden'), 2800);
     }
-
     function addLog(text) {
       const cls = getCurrentClass();
       const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -576,34 +676,35 @@
       saveState();
     }
 
-    // ==================== NAVIGATION & HEADER ====================
+    // ==================== HEADER & NAVIGATION ====================
     function renderHeaderSelectors() {
       const classSelect = document.getElementById('classSelect');
       classSelect.innerHTML = state.classes.map(c =>
-        `<option value="${c.id}" ${c.id === state.activeClassId ? 'selected' : ''}>${c.name} (${c.currency})</option>`
+        `<option value="${c.id}" ${c.id === state.activeClassId ? 'selected' : ''}>${c.name}</option>`
       ).join('');
 
       const cls = getCurrentClass();
       const userSelect = document.getElementById('activeUserSelect');
-      userSelect.innerHTML = `<option value="teacher" ${state.activeUserId === 'teacher' ? 'selected' : ''}>👩‍🏫 담임 교사 (관리자)</option>` +
+      userSelect.innerHTML =
         cls.students.map(s =>
-          `<option value="${s.id}" ${state.activeUserId === s.id ? 'selected' : ''}>${s.num}번 ${s.name} ${s.isAdmin ? '[은행원]' : ''}</option>`
-        ).join('');
+          `<option value="${s.id}" ${state.activeUserId === s.id ? 'selected' : ''}>${s.num}번 ${s.name}${s.isAdmin ? ' (은행원)' : ''}</option>`
+        ).join('') +
+        `<option value="teacher" ${state.activeUserId === 'teacher' ? 'selected' : ''}>👩‍🏫 담임 교사</option>`;
     }
 
     function switchClass(classId) {
       state.activeClassId = classId;
-      state.activeUserId = 'teacher';
+      state.activeUserId = getCurrentClass().students[0]?.id || 'teacher';
       saveState();
       renderAll();
-      if (state.activeTab === 'metaverse') rebuild3DStudents();
+      if (threeScene) rebuild3DStudents();
     }
 
     function switchActiveUser(userId) {
       state.activeUserId = userId;
       saveState();
       renderAll();
-      if (state.activeTab === 'metaverse') updateMetaverseRoster();
+      if (threeScene) updateMetaverseRoster();
     }
 
     function switchTab(tabId) {
@@ -613,36 +714,50 @@
 
       document.querySelectorAll('.nav-btn').forEach(btn => {
         if (btn.dataset.tab === tabId) {
-          btn.classList.add('tab-active');
-          btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+          btn.classList.add('nav-pill-active');
+          btn.classList.remove('text-zinc-500', 'hover:text-zinc-900', 'hover:bg-zinc-100');
         } else {
-          btn.classList.remove('tab-active');
-          btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+          btn.classList.remove('nav-pill-active');
+          btn.classList.add('text-zinc-500', 'hover:text-zinc-900', 'hover:bg-zinc-100');
         }
       });
 
-      if (tabId === 'metaverse') {
-        setTimeout(() => initThreeClassroom(), 50);
-      }
+      if (tabId === 'metaverse') setTimeout(() => initThreeClassroom(), 50);
       renderAll();
+    }
+
+    function switchManageSubTab(subId) {
+      state.activeManageSub = subId;
+      document.querySelectorAll('.sub-section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`sub-${subId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.sub-btn').forEach(btn => {
+        if (btn.dataset.sub === subId) {
+          btn.classList.add('bg-zinc-900', 'text-white');
+          btn.classList.remove('text-zinc-500', 'hover:bg-zinc-100');
+        } else {
+          btn.classList.remove('bg-zinc-900', 'text-white');
+          btn.classList.add('text-zinc-500', 'hover:bg-zinc-100');
+        }
+      });
     }
 
     function openNewClassModal() {
       openModal(`
-        <h3 class="font-bold text-lg text-slate-900">새 학급(반) 생성</h3>
-        <div class="space-y-3 text-sm">
+        <h3 class="font-extrabold text-base text-zinc-900">새 학급 추가</h3>
+        <div class="space-y-3 text-xs">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">학급 이름</label>
-            <input id="modalClassName" type="text" placeholder="예: 5학년 2반" class="w-full px-3 py-2 border rounded-xl" />
+            <label class="block font-bold text-zinc-600 mb-1">학급 이름</label>
+            <input id="modalClassName" type="text" placeholder="예: 5학년 2반" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">학급 화폐 단위</label>
-            <input id="modalClassCurrency" type="text" value="달란트" placeholder="예: 미소, 잎새, 코인" class="w-full px-3 py-2 border rounded-xl" />
+            <label class="block font-bold text-zinc-600 mb-1">화폐 단위</label>
+            <input id="modalClassCurrency" type="text" value="달란트" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-slate-500">취소</button>
-          <button onclick="createNewClass()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl">생성하기</button>
+          <button onclick="closeModal()" class="px-3.5 py-2 text-xs font-bold text-zinc-400">취소</button>
+          <button onclick="createNewClass()" class="px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-xl">생성</button>
         </div>
       `);
     }
@@ -650,135 +765,103 @@
     function createNewClass() {
       const name = document.getElementById('modalClassName').value.trim();
       const currency = document.getElementById('modalClassCurrency').value.trim() || '미소';
-      if (!name) return alert('학급 이름을 입력하세요.');
+      if (!name) return;
       const newId = 'class-' + Date.now();
       const base = getCurrentClass();
       state.classes.push({
-        id: newId,
-        name,
-        currency,
-        dayCount: 1,
-        newsIndex: 0,
+        id: newId, name, currency, dayCount: 1, newsIndex: 0,
         jobs: JSON.parse(JSON.stringify(DEFAULT_30_JOBS)),
         assets: JSON.parse(JSON.stringify(base.assets)),
         students: [
-          { id: 's-' + Date.now() + '1', num: 1, name: '홍길동', jobId: 'j1', isAdmin: true, balance: 2000, portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: [], equipped: { hat: '', glasses: '', shirtColor: '#4f46e5', shirtName: '기본 의상' }, x: -2, z: -1, isSitting: false, chat: '' }
+          { id: 's-' + Date.now(), num: 1, name: '홍길동', jobId: 'j1', isAdmin: true, balance: 2000, portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: ['item-glass1', 'item-pet1'], equipped: { hat: '', glasses: '👓', shirtColor: '#881337', pet: '🐱' }, x: -2, z: -1, isSitting: false, chat: '' }
         ],
         shopItems: JSON.parse(JSON.stringify(base.shopItems)),
         missions: JSON.parse(JSON.stringify(base.missions)),
-        logs: [`[시스템] ${name} 학급이 새로 생성되었습니다.`]
+        logs: [`[시스템] ${name} 학급이 생성되었습니다.`]
       });
       state.activeClassId = newId;
-      state.activeUserId = 'teacher';
+      state.activeUserId = state.classes[state.classes.length - 1].students[0].id;
       closeModal();
       saveState();
       renderAll();
-      showToast(`${name}이(가) 생성되었습니다.`);
+      showToast(`${name} 생성 완료`);
     }
 
-    // ==================== 1. DASHBOARD & SALARY ====================
-    function renderDashboard() {
+    // ==================== TAB 1: HOME (STUDENT FIRST VIEW) ====================
+    function renderHomeTab() {
       const cls = getCurrentClass();
+      const st = getActiveStudent();
+      const isTeacher = state.activeUserId === 'teacher';
       const isMgr = canManageFinance();
-      document.getElementById('dashClassName').textContent = cls.name;
-      document.getElementById('dashCurrency').textContent = `화폐 단위: ${cls.currency}`;
-      document.getElementById('dashStudentCount').textContent = `${cls.students.length}명`;
-      document.getElementById('dashAdminCount').textContent = `학생 은행원(관리자): ${cls.students.filter(s => s.isAdmin).length}명`;
-      const total = cls.students.reduce((sum, s) => sum + s.balance, 0);
-      document.getElementById('dashTotalMoney').textContent = `${total.toLocaleString()} ${cls.currency}`;
 
-      document.getElementById('payAllBtn').disabled = !isMgr;
-      const roleBadge = document.getElementById('roleBadge');
-      if (state.activeUserId === 'teacher') {
-        roleBadge.textContent = '👩‍🏫 교사(최고 관리자) 모드';
-        roleBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
-      } else if (isMgr) {
-        roleBadge.textContent = '🏦 학생 관리자(은행원) 권한 활성화';
-        roleBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200';
-      } else {
-        roleBadge.textContent = '🎓 일반 학생 모드 (지급 권한 없음)';
-        roleBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200';
+      if (st) {
+        const job = cls.jobs.find(j => j.id === st.jobId);
+        document.getElementById('homeRoleBadge').textContent = isTeacher ? '👩‍🏫 교사 미리보기 (1번 학생 기준)' : (st.isAdmin ? '🏦 은행원(관리자) 학생' : '🎓 학생 지갑');
+        document.getElementById('homeStudentName').textContent = `${st.num}번 ${st.name}`;
+        document.getElementById('homeStudentJob').textContent = job ? `${job.title} · ${job.desc}` : '직업 미배정';
+        document.getElementById('homeBalance').textContent = `${st.balance.toLocaleString()} ${cls.currency}`;
+        document.getElementById('homeSalary').textContent = `${job ? job.salary.toLocaleString() : 0} ${cls.currency}`;
+        drawMaplePixelAvatar(document.getElementById('homeAvatarCanvas'), st.equipped);
       }
 
-      const tbody = document.getElementById('dashboardTableBody');
-      tbody.innerHTML = cls.students.sort((a, b) => a.num - b.num).map(st => {
-        const job = cls.jobs.find(j => j.id === st.jobId);
+      // Morning News Preview
+      const news = NEWS_SCENARIOS[cls.newsIndex % NEWS_SCENARIOS.length];
+      document.getElementById('homeNewsDay').textContent = `Day ${cls.dayCount} 아침 경제 뉴스`;
+      document.getElementById('homeNewsTitle').textContent = news.title;
+      document.getElementById('homeNewsBody').textContent = news.body;
+      document.getElementById('homeNewsBadges').innerHTML = Object.entries(news.changes).map(([k, v]) => {
+        const labelMap = { gold: '금', stock: '주식', bond: '채권', coin: '코인' };
+        const pct = (v * 100).toFixed(0);
+        const clsColor = v > 0 ? 'bg-emerald-50 text-emerald-700' : v < 0 ? 'bg-rose-50 text-rose-700' : 'bg-zinc-100 text-zinc-600';
+        return `<span class="px-2 py-0.5 rounded-md font-bold ${clsColor}">${labelMap[k]} ${v > 0 ? '+' + pct : pct}%</span>`;
+      }).join('');
+
+      // Today's Missions List
+      document.getElementById('homeAddMissionBtn').style.display = isMgr ? 'inline-block' : 'none';
+      const missionsEl = document.getElementById('homeMissionsList');
+      missionsEl.innerHTML = cls.missions.map(m => {
+        const isCompleted = st && !isTeacher && m.completedBy.includes(st.id);
+        const isPending = st && !isTeacher && m.pendingBy.includes(st.id);
+
+        let actionHtml = '';
+        if (isMgr && m.pendingBy.length > 0) {
+          actionHtml = m.pendingBy.map(sid => {
+            const reqSt = cls.students.find(x => x.id === sid);
+            if (!reqSt) return '';
+            return `<button onclick="approveMission('${m.id}', '${reqSt.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-bold">${reqSt.name} 승인 (+${m.reward})</button>`;
+          }).join(' ');
+        } else if (!isTeacher && st) {
+          if (isCompleted) actionHtml = `<span class="text-[11px] font-bold text-emerald-600">완료됨</span>`;
+          else if (isPending) actionHtml = `<span class="text-[11px] font-bold text-amber-600">승인 대기</span>`;
+          else actionHtml = `<button onclick="requestMissionComplete('${m.id}')" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-bold">완료 신청</button>`;
+        }
+
         return `
-          <tr class="hover:bg-slate-50/80">
-            <td class="py-3 px-4 font-semibold text-slate-600">${st.num}번</td>
-            <td class="py-3 px-4 font-bold text-slate-900">${st.name}</td>
-            <td class="py-3 px-4">
-              ${st.isAdmin
-                ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-700">은행원(관리자)</span>'
-                : '<span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">일반 학생</span>'}
-            </td>
-            <td class="py-3 px-4">
-              <div class="font-semibold text-slate-800">${job ? job.title : '미배정'}</div>
-              <div class="text-[11px] text-slate-400">${job ? job.desc : '-'}</div>
-            </td>
-            <td class="py-3 px-4 font-semibold text-slate-700">${job ? job.salary.toLocaleString() : 0} ${cls.currency}</td>
-            <td class="py-3 px-4 font-extrabold text-emerald-600">${st.balance.toLocaleString()} ${cls.currency}</td>
-            <td class="py-3 px-4 text-right space-x-1">
-              <button ${!isMgr ? 'disabled' : ''} onclick="payIndividualSalary('${st.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 text-white text-xs font-bold transition">
-                월급 지급
-              </button>
-              <button ${!isMgr ? 'disabled' : ''} onclick="giveCustomBonus('${st.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:bg-slate-200 text-white text-xs font-bold transition">
-                +보너스
-              </button>
-            </td>
-          </tr>
+          <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-zinc-200 text-zinc-600">${m.type}</span>
+                <span class="text-xs font-bold text-zinc-900">${m.title}</span>
+              </div>
+              <div class="text-[11px] text-zinc-400 mt-0.5">${m.desc}</div>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="text-xs font-extrabold text-emerald-600">+${m.reward} ${cls.currency}</span>
+              ${actionHtml}
+            </div>
+          </div>
         `;
       }).join('');
 
-      document.getElementById('transactionLog').innerHTML = cls.logs.map(l =>
-        `<div class="px-3 py-1.5 rounded-lg bg-slate-50 text-slate-600 border border-slate-100">${l}</div>`
-      ).join('');
+      // Quick Admin Strip
+      const total = cls.students.reduce((sum, s) => sum + s.balance, 0);
+      document.getElementById('dashTotalMoney').textContent = `${total.toLocaleString()} ${cls.currency}`;
+      document.getElementById('dashStudentCount').textContent = `${cls.students.length}명`;
+      document.getElementById('payAllBtn').disabled = !isMgr;
     }
 
-    function payIndividualSalary(studentId) {
-      if (!canManageFinance()) return alert('급여 지급 권한이 없습니다.');
-      const cls = getCurrentClass();
-      const st = cls.students.find(s => s.id === studentId);
-      const job = cls.jobs.find(j => j.id === st.jobId);
-      const amount = job ? job.salary : 0;
-      if (amount <= 0) return alert('배정된 직업의 급여가 0입니다.');
-      st.balance += amount;
-      addLog(`[급여 지급] ${st.name}(${job.title})에게 기본 급여 ${amount.toLocaleString()} ${cls.currency} 지급`);
-      renderAll();
-      showToast(`${st.name} 학생에게 ${amount.toLocaleString()} ${cls.currency} 지급 완료!`);
-    }
-
-    function payAllSalaries() {
-      if (!canManageFinance()) return alert('급여 지급 권한이 없습니다.');
-      const cls = getCurrentClass();
-      let count = 0;
-      cls.students.forEach(st => {
-        const job = cls.jobs.find(j => j.id === st.jobId);
-        if (job && job.salary > 0) {
-          st.balance += job.salary;
-          count++;
-        }
-      });
-      addLog(`[일괄 급여] 재적 학생 ${count}명 전원에게 직업별 기본 급여 일괄 지급 완료`);
-      renderAll();
-      showToast(`${count}명 전원에게 급여를 일괄 지급했습니다.`);
-    }
-
-    function giveCustomBonus(studentId) {
-      if (!canManageFinance()) return;
-      const cls = getCurrentClass();
-      const st = cls.students.find(s => s.id === studentId);
-      const val = prompt(`${st.name} 학생에게 지급할 보너스 금액 (${cls.currency})을 입력하세요:`, '500');
-      const amount = parseInt(val, 10);
-      if (!amount || isNaN(amount)) return;
-      st.balance += amount;
-      addLog(`[보너스] ${st.name} 학생에게 ${amount.toLocaleString()} ${cls.currency} 특별 지급`);
-      renderAll();
-      showToast(`${st.name}에게 ${amount.toLocaleString()} ${cls.currency} 지급!`);
-    }
-
-    // ==================== 2. 3D METAVERSE CLASSROOM (THREE.JS) ====================
-    let threeScene, threeCamera, threeRenderer, threeAnimId;
+    // ==================== 3D METAVERSE CLASSROOM ====================
+    let threeScene, threeCamera, threeRenderer;
     let studentMeshes = {};
     let chairPositions = [];
     let keysPressed = {};
@@ -795,7 +878,7 @@
       }
 
       threeScene = new THREE.Scene();
-      threeScene.background = new THREE.Color(0xdbeafe);
+      threeScene.background = new THREE.Color(0xe4e4e7);
 
       threeCamera = new THREE.PerspectiveCamera(48, container.clientWidth / container.clientHeight, 0.1, 100);
       threeCamera.position.set(0, 8.5, 10.5);
@@ -803,29 +886,22 @@
 
       threeRenderer = new THREE.WebGLRenderer({ antialias: true });
       threeRenderer.setSize(container.clientWidth, container.clientHeight);
-      threeRenderer.shadowMap.enabled = true;
       container.innerHTML = '';
       container.appendChild(threeRenderer.domElement);
 
-      // Lights
-      const ambient = new THREE.AmbientLight(0xffffff, 0.72);
-      threeScene.add(ambient);
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
+      threeScene.add(new THREE.AmbientLight(0xffffff, 0.78));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.55);
       dirLight.position.set(6, 12, 8);
-      dirLight.castShadow = true;
       threeScene.add(dirLight);
 
-      // Classroom Wooden Floor
-      const floorGeo = new THREE.BoxGeometry(14, 0.2, 11);
-      const floorMat = new THREE.MeshStandardMaterial({ color: 0xd9a773 });
-      const floor = new THREE.Mesh(floorGeo, floorMat);
+      // Floor
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 11), new THREE.MeshStandardMaterial({ color: 0xd6b588 }));
       floor.position.y = -0.1;
-      floor.receiveShadow = true;
       floor.name = 'classroomFloor';
       threeScene.add(floor);
 
-      // Walls (Back & Sides)
-      const wallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
+      // Walls & Blackboard
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0xfafafa });
       const backWall = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 0.2), wallMat);
       backWall.position.set(0, 2, -5.5);
       threeScene.add(backWall);
@@ -838,52 +914,36 @@
       rightWall.position.set(7, 2, 0);
       threeScene.add(rightWall);
 
-      // Windows on left wall
-      const winMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd, emissive: 0x38bdf8, emissiveIntensity: 0.2 });
-      [-2.5, 1.5].forEach(zPos => {
-        const win = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.8, 2.4), winMat);
-        win.position.set(-6.9, 2.2, zPos);
-        threeScene.add(win);
-      });
-
-      // Green Blackboard + Wooden Frame
-      const boardFrame = new THREE.Mesh(new THREE.BoxGeometry(6.4, 2.1, 0.15), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      const boardFrame = new THREE.Mesh(new THREE.BoxGeometry(6.4, 2.1, 0.15), new THREE.MeshStandardMaterial({ color: 0x52525b }));
       boardFrame.position.set(0, 2.2, -5.35);
       threeScene.add(boardFrame);
 
-      const blackboard = new THREE.Mesh(new THREE.BoxGeometry(6.0, 1.8, 0.18), new THREE.MeshStandardMaterial({ color: 0x065f46 }));
+      const blackboard = new THREE.Mesh(new THREE.BoxGeometry(6.0, 1.8, 0.18), new THREE.MeshStandardMaterial({ color: 0x064e3b }));
       blackboard.position.set(0, 2.2, -5.32);
       threeScene.add(blackboard);
 
-      // Teacher's Podium (교탁)
-      const podium = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.0, 0.8), new THREE.MeshStandardMaterial({ color: 0x92400e }));
+      const podium = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.0, 0.8), new THREE.MeshStandardMaterial({ color: 0x78350f }));
       podium.position.set(0, 0.5, -4.1);
       threeScene.add(podium);
 
-      // Student Desks & Chairs (4 columns x 3 rows = 12 sets)
+      // Desks & Chairs
       chairPositions = [];
-      const deskTopMat = new THREE.MeshStandardMaterial({ color: 0xfde68a });
-      const legMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
-      const chairMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+      const deskMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7 });
+      const legMat = new THREE.MeshStandardMaterial({ color: 0x52525b });
+      const chairMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
 
-      const cols = [-4.2, -1.4, 1.4, 4.2];
-      const rows = [-2.0, 0.4, 2.8];
-
-      rows.forEach((z, rIdx) => {
-        cols.forEach((x, cIdx) => {
-          // Desk top
-          const desk = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.08, 0.85), deskTopMat);
+      [-2.0, 0.4, 2.8].forEach((z, rIdx) => {
+        [-4.2, -1.4, 1.4, 4.2].forEach((x, cIdx) => {
+          const desk = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.08, 0.85), deskMat);
           desk.position.set(x, 0.72, z);
           threeScene.add(desk);
 
-          // Desk legs
           [[-0.55, -0.35], [0.55, -0.35], [-0.55, 0.35], [0.55, 0.35]].forEach(([lx, lz]) => {
             const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.72), legMat);
             leg.position.set(x + lx, 0.36, z + lz);
             threeScene.add(leg);
           });
 
-          // Chair placed behind desk (z + 0.62)
           const chairZ = z + 0.62;
           const seat = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.07, 0.6), chairMat);
           seat.position.set(x, 0.42, chairZ);
@@ -897,7 +957,6 @@
         });
       });
 
-      // Click on floor to move
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
       threeRenderer.domElement.addEventListener('pointerdown', (e) => {
@@ -905,14 +964,10 @@
         mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
         raycaster.setFromCamera(mouse, threeCamera);
-        const hits = raycaster.intersectObjects(threeScene.children);
-        const floorHit = hits.find(h => h.object.name === 'classroomFloor');
+        const floorHit = raycaster.intersectObjects(threeScene.children).find(h => h.object.name === 'classroomFloor');
         if (floorHit) {
-          const st = getControlledStudent();
-          if (st && st.isSitting) {
-            st.isSitting = false;
-            updateSitButtonUI();
-          }
+          const st = getActiveStudent();
+          if (st && st.isSitting) { st.isSitting = false; updateSitButtonUI(); }
           targetMovePos = {
             x: Math.max(-6.2, Math.min(6.2, floorHit.point.x)),
             z: Math.max(-4.5, Math.min(4.8, floorHit.point.z))
@@ -923,24 +978,12 @@
       window.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
         keysPressed[e.key.toLowerCase()] = true;
-        if (e.key.toLowerCase() === 'e' && state.activeTab === 'metaverse') {
-          toggleSitStand();
-        }
+        if (e.key.toLowerCase() === 'e' && state.activeTab === 'metaverse') toggleSitStand();
       });
-      window.addEventListener('keyup', (e) => {
-        keysPressed[e.key.toLowerCase()] = false;
-      });
+      window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
 
       rebuild3DStudents();
       animateThreeClassroom();
-    }
-
-    function getControlledStudent() {
-      const cls = getCurrentClass();
-      if (state.activeUserId !== 'teacher') {
-        return cls.students.find(s => s.id === state.activeUserId);
-      }
-      return cls.students[0];
     }
 
     function createNameSprite(text, chatText) {
@@ -954,16 +997,16 @@
         ctx.beginPath();
         ctx.roundRect(20, 8, 280, 44, 14);
         ctx.fill();
-        ctx.strokeStyle = '#4f46e5';
+        ctx.strokeStyle = '#18181b';
         ctx.lineWidth = 3;
         ctx.stroke();
-        ctx.fillStyle = '#1e293b';
+        ctx.fillStyle = '#18181b';
         ctx.font = 'bold 20px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(chatText.slice(0, 16), 160, 36);
       }
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
+      ctx.fillStyle = 'rgba(24, 24, 27, 0.85)';
       ctx.beginPath();
       ctx.roundRect(70, 62, 180, 34, 12);
       ctx.fill();
@@ -973,75 +1016,71 @@
       ctx.fillText(text, 160, 85);
 
       const tex = new THREE.CanvasTexture(canvas);
-      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-      const sprite = new THREE.Sprite(mat);
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
       sprite.scale.set(2.2, 0.75, 1);
       return sprite;
     }
 
     function rebuild3DStudents() {
       if (!threeScene) return;
-      Object.values(studentMeshes).forEach(group => threeScene.remove(group));
+      Object.values(studentMeshes).forEach(g => threeScene.remove(g));
       studentMeshes = {};
 
       const cls = getCurrentClass();
       cls.students.forEach(st => {
         const group = new THREE.Group();
 
-        // Body (Torso)
-        const torsoColor = st.equipped?.shirtColor || '#4f46e5';
+        // Chibi 3D Proportions matching the pixel avatar
         const torso = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.24, 0.28, 0.65, 16),
-          new THREE.MeshStandardMaterial({ color: torsoColor })
+          new THREE.CylinderGeometry(0.24, 0.28, 0.58, 16),
+          new THREE.MeshStandardMaterial({ color: st.equipped?.shirtColor || '#881337' })
         );
-        torso.position.y = 0.68;
+        torso.position.y = 0.65;
         group.add(torso);
 
-        // Legs
-        const legMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
-        const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.42), legMat);
-        leftLeg.position.set(-0.11, 0.21, 0);
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
+        const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4), legMat);
+        leftLeg.position.set(-0.11, 0.2, 0);
         leftLeg.name = 'leftLeg';
         group.add(leftLeg);
 
-        const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.42), legMat);
-        rightLeg.position.set(0.11, 0.21, 0);
+        const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4), legMat);
+        rightLeg.position.set(0.11, 0.2, 0);
         rightLeg.name = 'rightLeg';
         group.add(rightLeg);
 
-        // Head
-        const head = new THREE.Mesh(
-          new THREE.SphereGeometry(0.25, 20, 20),
-          new THREE.MeshStandardMaterial({ color: 0xfde68a })
-        );
-        head.position.y = 1.22;
+        // Large Chibi Head + Black Hair Cap
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 20), new THREE.MeshStandardMaterial({ color: 0xfef3c7 }));
+        head.position.y = 1.24;
         group.add(head);
 
-        // Equipped Hat 3D Mesh
-        if (st.equipped?.hat) {
-          const hatColor = st.equipped.hat === '👑' ? 0xfacc15 : 0x2563eb;
-          const hat = new THREE.Mesh(
-            new THREE.ConeGeometry(0.22, 0.28, 12),
-            new THREE.MeshStandardMaterial({ color: hatColor })
-          );
-          hat.position.y = 1.54;
-          group.add(hat);
-        }
+        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.335, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.55), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+        hair.position.y = 1.26;
+        group.add(hair);
 
-        // Equipped Glasses 3D Mesh
         if (st.equipped?.glasses) {
-          const glasses = new THREE.Mesh(
-            new THREE.BoxGeometry(0.36, 0.09, 0.1),
-            new THREE.MeshStandardMaterial({ color: 0x0f172a })
-          );
-          glasses.position.set(0, 1.24, 0.22);
+          const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.1, 0.1), new THREE.MeshStandardMaterial({ color: 0x27272a }));
+          glasses.position.set(0, 1.22, 0.3);
           group.add(glasses);
         }
 
-        // Name & Chat Sprite
+        if (st.equipped?.hat) {
+          const hat = new THREE.Mesh(
+            new THREE.ConeGeometry(0.22, 0.26, 12),
+            new THREE.MeshStandardMaterial({ color: st.equipped.hat === '👑' ? 0xfacc15 : 0x2563eb })
+          );
+          hat.position.y = 1.66;
+          group.add(hat);
+        }
+
+        if (st.equipped?.pet) {
+          const pet = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), new THREE.MeshStandardMaterial({ color: 0x71717a }));
+          pet.position.set(0.42, 0.22, 0.1);
+          group.add(pet);
+        }
+
         const label = createNameSprite(`${st.num}번 ${st.name}`, st.chat);
-        label.position.y = 1.95;
-        label.name = 'nameSprite';
+        label.position.y = 2.05;
         group.add(label);
 
         group.position.set(st.x || 0, 0, st.z || 0);
@@ -1060,17 +1099,17 @@
       const rightLeg = group.getObjectByName('rightLeg');
       if (isSitting) {
         group.position.y = -0.18;
-        if (leftLeg) { leftLeg.rotation.x = -Math.PI / 2.2; leftLeg.position.set(-0.11, 0.48, 0.18); }
-        if (rightLeg) { rightLeg.rotation.x = -Math.PI / 2.2; rightLeg.position.set(0.11, 0.48, 0.18); }
+        if (leftLeg) { leftLeg.rotation.x = -Math.PI / 2.2; leftLeg.position.set(-0.11, 0.46, 0.18); }
+        if (rightLeg) { rightLeg.rotation.x = -Math.PI / 2.2; rightLeg.position.set(0.11, 0.46, 0.18); }
       } else {
         group.position.y = 0;
-        if (leftLeg) { leftLeg.rotation.x = 0; leftLeg.position.set(-0.11, 0.21, 0); }
-        if (rightLeg) { rightLeg.rotation.x = 0; rightLeg.position.set(0.11, 0.21, 0); }
+        if (leftLeg) { leftLeg.rotation.x = 0; leftLeg.position.set(-0.11, 0.2, 0); }
+        if (rightLeg) { rightLeg.rotation.x = 0; rightLeg.position.set(0.11, 0.2, 0); }
       }
     }
 
     function toggleSitStand() {
-      const st = getControlledStudent();
+      const st = getActiveStudent();
       if (!st) return;
       const group = studentMeshes[st.id];
       if (!group) return;
@@ -1080,11 +1119,8 @@
         st.z += 0.35;
         group.position.z = st.z;
         applySitPose(group, false);
-        showToast(`${st.name} 아바타가 자리에서 일어났습니다.`);
       } else {
-        // Find nearest chair
-        let nearest = null;
-        let minDist = 999;
+        let nearest = null, minDist = 999;
         chairPositions.forEach(c => {
           const d = Math.hypot(st.x - c.x, st.z - c.z);
           if (d < minDist) { minDist = d; nearest = c; }
@@ -1095,11 +1131,10 @@
           st.isSitting = true;
           targetMovePos = null;
           group.position.set(st.x, 0, st.z);
-          group.rotation.y = Math.PI; // Face the blackboard
+          group.rotation.y = Math.PI;
           applySitPose(group, true);
-          showToast(`${st.name} 아바타가 의자에 앉았습니다.`);
         } else {
-          showToast('의자 가까이로 이동한 뒤 앉기 버튼을 눌러주세요!');
+          showToast('책상 의자 근처로 이동 후 앉기(E)를 눌러주세요.');
         }
       }
       saveState();
@@ -1107,17 +1142,12 @@
     }
 
     function updateSitButtonUI() {
-      const st = getControlledStudent();
+      const st = getActiveStudent();
       const btnText = document.getElementById('sitStandText');
       const overlay = document.getElementById('metaverseStatusOverlay');
       if (!st || !btnText) return;
-      if (st.isSitting) {
-        btnText.textContent = '의자에서 일어서기 (E)';
-        overlay.textContent = `조작 중: ${st.name} (의자에 착석 중)`;
-      } else {
-        btnText.textContent = '가까운 의자에 앉기 (E)';
-        overlay.textContent = `조작 중: ${st.name} (교실 이동 중)`;
-      }
+      btnText.textContent = st.isSitting ? '의자에서 일어서기 (E)' : '가까운 의자에 앉기 (E)';
+      overlay.textContent = `${st.name} · ${st.isSitting ? '의자에 착석 중' : '교실 이동 중'}`;
     }
 
     function resetCameraView() {
@@ -1130,42 +1160,39 @@
       const input = document.getElementById('chatInput');
       const msg = input.value.trim();
       if (!msg) return;
-      const st = getControlledStudent();
+      const st = getActiveStudent();
       if (!st) return;
       st.chat = msg;
       input.value = '';
       rebuild3DStudents();
-      clearTimeout(window._chatClearTimer);
-      window._chatClearTimer = setTimeout(() => {
-        st.chat = '';
-        rebuild3DStudents();
-      }, 6000);
+      clearTimeout(window._chatTimer);
+      window._chatTimer = setTimeout(() => { st.chat = ''; rebuild3DStudents(); }, 6000);
     }
 
     function updateMetaverseRoster() {
       const cls = getCurrentClass();
-      const ctrl = getControlledStudent();
+      const ctrl = getActiveStudent();
       const el = document.getElementById('metaverseRoster');
       if (!el) return;
       el.innerHTML = cls.students.map(st => {
         const job = cls.jobs.find(j => j.id === st.jobId);
         const isMe = ctrl && ctrl.id === st.id;
         return `
-          <div class="p-2.5 rounded-xl border ${isMe ? 'border-indigo-400 bg-indigo-50/60' : 'border-slate-100 bg-slate-50'} flex items-center justify-between text-xs">
+          <div class="p-2.5 rounded-xl border ${isMe ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-100'} flex items-center justify-between text-xs">
             <div>
-              <div class="font-bold text-slate-900">${st.equipped?.hat || ''} ${st.num}번 ${st.name} ${st.equipped?.glasses || ''}</div>
-              <div class="text-[11px] text-slate-500">${job ? job.title : '직업 없음'} · ${st.isSitting ? '착석 중' : '이동 중'}</div>
+              <div class="font-bold text-zinc-900">${st.num}번 ${st.name}</div>
+              <div class="text-[11px] text-zinc-400">${job ? job.title : '-'} · ${st.isSitting ? '착석' : '활동중'}</div>
             </div>
-            ${isMe ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-600 text-white">조작중</span>' : ''}
+            ${isMe ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-900 text-white">나</span>' : ''}
           </div>
         `;
       }).join('');
     }
 
     function animateThreeClassroom() {
-      threeAnimId = requestAnimationFrame(animateThreeClassroom);
+      requestAnimationFrame(animateThreeClassroom);
       if (state.activeTab === 'metaverse') {
-        const st = getControlledStudent();
+        const st = getActiveStudent();
         if (st && studentMeshes[st.id]) {
           const group = studentMeshes[st.id];
           const speed = 0.07;
@@ -1178,19 +1205,13 @@
 
           if (dx !== 0 || dz !== 0) {
             targetMovePos = null;
-            if (st.isSitting) {
-              st.isSitting = false;
-              applySitPose(group, false);
-              updateSitButtonUI();
-            }
+            if (st.isSitting) { st.isSitting = false; applySitPose(group, false); updateSitButtonUI(); }
           } else if (targetMovePos) {
             const dist = Math.hypot(targetMovePos.x - st.x, targetMovePos.z - st.z);
             if (dist > 0.08) {
               dx = ((targetMovePos.x - st.x) / dist) * speed;
               dz = ((targetMovePos.z - st.z) / dist) * speed;
-            } else {
-              targetMovePos = null;
-            }
+            } else targetMovePos = null;
           }
 
           if (dx !== 0 || dz !== 0) {
@@ -1205,73 +1226,57 @@
       }
     }
 
-    // ==================== 3. INVESTMENT & DAILY MORNING NEWS ====================
+    // ==================== INVESTMENT & MORNING NEWS ====================
     function renderInvestTab() {
       const cls = getCurrentClass();
       const news = NEWS_SCENARIOS[cls.newsIndex % NEWS_SCENARIOS.length];
 
-      document.getElementById('newsDayLabel').textContent = `Day ${cls.dayCount} 아침 경제 브리핑`;
+      document.getElementById('newsDayLabel').textContent = `Day ${cls.dayCount} 아침 경제 뉴스`;
       document.getElementById('morningNewsTitle').textContent = news.title;
       document.getElementById('morningNewsBody').textContent = news.body;
       document.getElementById('morningNewsImpact').innerHTML = Object.entries(news.changes).map(([k, v]) => {
         const labelMap = { gold: '금', stock: '주식', bond: '채권', coin: '코인' };
         const pct = (v * 100).toFixed(0);
-        const color = v > 0 ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40' : v < 0 ? 'bg-rose-500/20 text-rose-200 border-rose-400/40' : 'bg-white/10 text-slate-200 border-white/20';
-        return `<span class="px-2.5 py-1 rounded-lg border ${color} font-semibold">${labelMap[k]} 전망: ${v > 0 ? '+' + pct : pct}%</span>`;
+        const color = v > 0 ? 'bg-emerald-50 text-emerald-700' : v < 0 ? 'bg-rose-50 text-rose-700' : 'bg-zinc-100 text-zinc-600';
+        return `<span class="px-2.5 py-1 rounded-lg ${color} font-bold">${labelMap[k]} ${v > 0 ? '+' + pct : pct}%</span>`;
       }).join('');
 
-      const st = getActiveStudent() || cls.students[0];
+      const st = getActiveStudent();
       document.getElementById('investUserLabel').textContent = st ? `${st.num}번 ${st.name}` : '-';
       document.getElementById('investCash').textContent = st ? `${st.balance.toLocaleString()} ${cls.currency}` : '0';
 
       let evalTotal = 0;
-      cls.assets.forEach(a => {
-        const qty = (st && st.portfolio && st.portfolio[a.id]) || 0;
-        evalTotal += qty * a.price;
-      });
+      cls.assets.forEach(a => { evalTotal += ((st?.portfolio?.[a.id]) || 0) * a.price; });
       document.getElementById('investEvalTotal').textContent = `${evalTotal.toLocaleString()} ${cls.currency}`;
-      document.getElementById('investProfitTotal').textContent = `보유 자산 가치 반영됨`;
 
-      const grid = document.getElementById('assetCardsGrid');
-      grid.innerHTML = cls.assets.map(asset => {
-        const qty = (st && st.portfolio && st.portfolio[asset.id]) || 0;
+      document.getElementById('assetCardsGrid').innerHTML = cls.assets.map(asset => {
+        const qty = (st?.portfolio?.[asset.id]) || 0;
         const diff = asset.price - asset.prevPrice;
         const diffPct = asset.prevPrice ? ((diff / asset.prevPrice) * 100).toFixed(1) : '0.0';
-        const badgeColor = diff > 0 ? 'text-emerald-600 bg-emerald-50' : diff < 0 ? 'text-rose-600 bg-rose-50' : 'text-slate-600 bg-slate-100';
+        const badgeColor = diff > 0 ? 'text-emerald-600' : diff < 0 ? 'text-rose-600' : 'text-zinc-400';
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-4 shadow-xs">
+          <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 flex flex-col justify-between space-y-4">
             <div>
-              <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start justify-between">
                 <div>
-                  <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${asset.risk}</span>
-                  <h3 class="font-extrabold text-base text-slate-900 mt-1.5">${asset.name}</h3>
+                  <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-zinc-100 text-zinc-600">${asset.risk}</span>
+                  <h3 class="font-extrabold text-base text-zinc-900 mt-1.5">${asset.name}</h3>
                 </div>
                 <div class="text-right">
-                  <div class="text-lg font-extrabold text-slate-900">${asset.price.toLocaleString()} ${cls.currency}</div>
-                  <div class="text-xs font-bold px-2 py-0.5 rounded ${badgeColor} inline-block mt-0.5">
-                    ${diff > 0 ? '▲' : diff < 0 ? '▼' : '-'} ${Math.abs(diff).toLocaleString()} (${diff > 0 ? '+' : ''}${diffPct}%)
-                  </div>
+                  <div class="text-base font-extrabold text-zinc-900">${asset.price.toLocaleString()} ${cls.currency}</div>
+                  <div class="text-xs font-bold ${badgeColor}">${diff > 0 ? '▲' : diff < 0 ? '▼' : '-'} ${diff > 0 ? '+' : ''}${diffPct}%</div>
                 </div>
               </div>
-
-              <div class="mt-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-900 leading-relaxed">
-                <b>⚠️ 투자 유의사항:</b> ${asset.caution}
-              </div>
+              <p class="mt-3 p-3 rounded-xl bg-zinc-50 text-xs text-zinc-600 leading-relaxed">
+                <b class="text-zinc-800">유의사항:</b> ${asset.caution}
+              </p>
             </div>
-
-            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-              <div class="text-xs text-slate-600">
-                내 보유 수량: <b class="text-slate-900 text-sm">${qty}주(개)</b>
-                <span class="text-slate-400 ml-1">(${(qty * asset.price).toLocaleString()} ${cls.currency})</span>
-              </div>
+            <div class="pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+              <span>보유: <b class="text-zinc-900">${qty}개</b></span>
               <div class="flex gap-1.5">
-                <button onclick="tradeAsset('${asset.id}', 1)" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
-                  1개 매수
-                </button>
-                <button onclick="tradeAsset('${asset.id}', -1)" ${qty <= 0 ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:bg-slate-200 text-white text-xs font-bold transition">
-                  1개 매도
-                </button>
+                <button onclick="tradeAsset('${asset.id}', 1)" class="px-3 py-1.5 rounded-xl bg-zinc-900 text-white font-bold">매수</button>
+                <button onclick="tradeAsset('${asset.id}', -1)" ${qty <= 0 ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl bg-zinc-100 disabled:opacity-40 text-zinc-800 font-bold">매도</button>
               </div>
             </div>
           </div>
@@ -1284,131 +1289,174 @@
       cls.dayCount += 1;
       cls.newsIndex = (cls.newsIndex + 1) % NEWS_SCENARIOS.length;
       const news = NEWS_SCENARIOS[cls.newsIndex];
-
       cls.assets.forEach(asset => {
         asset.prevPrice = asset.price;
         const rate = news.changes[asset.id] || 0;
-        const jitter = (Math.random() - 0.5) * 0.02;
-        asset.price = Math.max(50, Math.round(asset.price * (1 + rate + jitter)));
+        asset.price = Math.max(50, Math.round(asset.price * (1 + rate + (Math.random() - 0.5) * 0.02)));
       });
-
-      addLog(`[아침 뉴스 Day ${cls.dayCount}] "${news.title}" 반영 및 시세 업데이트`);
+      addLog(`[Day ${cls.dayCount} 아침 뉴스] ${news.title}`);
       saveState();
-      renderInvestTab();
-      showToast(`Day ${cls.dayCount} 새로운 아침 경제 뉴스와 시세가 반영되었습니다!`);
+      renderAll();
+      showToast(`Day ${cls.dayCount} 새로운 아침 뉴스가 도착했습니다!`);
     }
 
     function tradeAsset(assetId, delta) {
       const cls = getCurrentClass();
-      const st = getActiveStudent() || cls.students[0];
+      const st = getActiveStudent();
       if (!st) return;
       const asset = cls.assets.find(a => a.id === assetId);
       if (!st.portfolio) st.portfolio = { gold: 0, stock: 0, bond: 0, coin: 0 };
 
       if (delta > 0) {
-        if (st.balance < asset.price) return alert('보유 현금이 부족합니다!');
+        if (st.balance < asset.price) return alert('잔액이 부족합니다.');
         st.balance -= asset.price;
         st.portfolio[assetId] = (st.portfolio[assetId] || 0) + 1;
-        addLog(`[투자 매수] ${st.name} 학생이 ${asset.name} 1단위를 ${asset.price.toLocaleString()} ${cls.currency}에 매수`);
-        showToast(`${asset.name} 매수 완료!`);
+        addLog(`[매수] ${st.name} · ${asset.name} 1단위`);
       } else {
         if ((st.portfolio[assetId] || 0) <= 0) return;
         st.portfolio[assetId] -= 1;
         st.balance += asset.price;
-        addLog(`[투자 매도] ${st.name} 학생이 ${asset.name} 1단위를 ${asset.price.toLocaleString()} ${cls.currency}에 매도`);
-        showToast(`${asset.name} 매도 완료!`);
+        addLog(`[매도] ${st.name} · ${asset.name} 1단위`);
       }
       saveState();
       renderAll();
     }
 
-    // ==================== 4. MISSIONS ====================
-    function renderMissionsTab() {
+    // ==================== SHOP & PIXEL AVATAR ====================
+    function renderShopTab() {
       const cls = getCurrentClass();
+      const st = getActiveStudent();
       const isMgr = canManageFinance();
-      const activeSt = getActiveStudent();
 
-      document.getElementById('openMissionModalBtn').style.display = isMgr ? 'inline-block' : 'none';
+      if (st) {
+        document.getElementById('shopUserBalance').textContent = `${st.balance.toLocaleString()} ${cls.currency}`;
+        drawMaplePixelAvatar(document.getElementById('shopAvatarCanvas'), st.equipped);
 
-      const grid = document.getElementById('missionsGrid');
-      grid.innerHTML = cls.missions.map(m => {
-        const badgeColor = m.type === '아침 미션' ? 'bg-amber-100 text-amber-800' : m.type === '교실 미션' ? 'bg-sky-100 text-sky-800' : 'bg-purple-100 text-purple-800';
-        const isCompleted = activeSt && m.completedBy.includes(activeSt.id);
-        const isPending = activeSt && m.pendingBy.includes(activeSt.id);
+        const invEl = document.getElementById('userInventoryList');
+        if (!st.inventory || st.inventory.length === 0) {
+          invEl.innerHTML = `<span class="text-xs text-zinc-400">보유한 아이템이 없습니다.</span>`;
+        } else {
+          invEl.innerHTML = st.inventory.map(itemId => {
+            const item = cls.shopItems.find(i => i.id === itemId);
+            if (!item) return '';
+            const isEquipped = item.type === 'avatar' && st.equipped && st.equipped[item.slot] === item.value;
+            return `
+              <button onclick="toggleEquipItem('${item.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${isEquipped ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-zinc-50 text-zinc-700 border-zinc-200'}">
+                ${item.icon} ${item.name}
+              </button>
+            `;
+          }).join('');
+        }
+      }
 
-        const pendingListHtml = isMgr && m.pendingBy.length > 0 ? `
-          <div class="mt-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5">
-            <div class="text-[11px] font-bold text-amber-900">승인 대기 중인 학생 (${m.pendingBy.length}명)</div>
-            ${m.pendingBy.map(sid => {
-              const s = cls.students.find(x => x.id === sid);
-              if (!s) return '';
-              return `
-                <div class="flex items-center justify-between text-xs bg-white px-2.5 py-1.5 rounded-lg border border-amber-100">
-                  <span class="font-semibold">${s.num}번 ${s.name}</span>
-                  <button onclick="approveMission('${m.id}', '${s.id}')" class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[11px]">
-                    승인 (+${m.reward})
-                  </button>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        ` : '';
-
-        return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-4 shadow-xs">
+      document.getElementById('shopItemsGrid').innerHTML = cls.shopItems.map(item => `
+        <div class="bg-white rounded-2xl border border-zinc-200/90 p-4 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-xl">${item.icon}</div>
             <div>
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${badgeColor}">${m.type}</span>
-                <span class="text-xs font-extrabold text-emerald-600">+${m.reward.toLocaleString()} ${cls.currency}</span>
-              </div>
-              <h3 class="font-bold text-base text-slate-900 mt-2">${m.title}</h3>
-              <p class="text-xs text-slate-500 mt-1 leading-relaxed">${m.desc}</p>
-              ${pendingListHtml}
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-[11px] text-slate-400">완료 인원: ${m.completedBy.length}명</span>
-              ${activeSt ? (
-                isCompleted ? `<span class="text-xs font-bold text-emerald-600">✅ 보너스 지급 완료</span>` :
-                isPending ? `<span class="text-xs font-bold text-amber-600">⏳ 선생님 승인 대기 중</span>` :
-                `<button onclick="requestMissionComplete('${m.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">미션 완료 신청</button>`
-              ) : (
-                isMgr ? `<button onclick="deleteMission('${m.id}')" class="text-xs text-rose-500 hover:underline">미션 삭제</button>` : ''
-              )}
+              <span class="text-[10px] font-bold text-zinc-400">${item.category}</span>
+              <div class="font-bold text-xs text-zinc-900">${item.name}</div>
+              <div class="text-xs font-extrabold text-emerald-600 mt-0.5">${item.price.toLocaleString()} ${cls.currency}</div>
             </div>
           </div>
-        `;
-      }).join('');
+          <div class="flex flex-col items-end gap-1">
+            <button onclick="buyShopItem('${item.id}')" class="px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-xs font-bold">구매</button>
+            ${isMgr ? `<button onclick="deleteShopItem('${item.id}')" class="text-[10px] text-zinc-400 hover:text-rose-500">삭제</button>` : ''}
+          </div>
+        </div>
+      `).join('');
     }
 
-    function openNewMissionModal() {
+    function buyShopItem(itemId) {
+      const cls = getCurrentClass();
+      const st = getActiveStudent();
+      if (!st) return;
+      const item = cls.shopItems.find(i => i.id === itemId);
+      if (st.balance < item.price) return alert('잔액이 부족합니다.');
+      st.balance -= item.price;
+      if (!st.inventory) st.inventory = [];
+      if (!st.inventory.includes(item.id)) st.inventory.push(item.id);
+      if (item.type === 'avatar') st.equipped[item.slot] = item.value;
+      addLog(`[상점] ${st.name} · "${item.name}" 구매`);
+      saveState();
+      renderAll();
+      if (threeScene) rebuild3DStudents();
+      showToast(`"${item.name}" 구매 및 장착 완료!`);
+    }
+
+    function toggleEquipItem(itemId) {
+      const cls = getCurrentClass();
+      const st = getActiveStudent();
+      const item = cls.shopItems.find(i => i.id === itemId);
+      if (!item || item.type !== 'avatar') return;
+      st.equipped[item.slot] = (st.equipped[item.slot] === item.value) ? (item.slot === 'shirtColor' ? '#881337' : '') : item.value;
+      saveState();
+      renderAll();
+      if (threeScene) rebuild3DStudents();
+    }
+
+    function openNewShopItemModal() {
       openModal(`
-        <h3 class="font-bold text-lg text-slate-900">새 학급 미션 등록</h3>
-        <div class="space-y-3 text-sm">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">미션 구분</label>
-            <select id="mType" class="w-full px-3 py-2 border rounded-xl">
-              <option value="아침 미션">아침 미션</option>
-              <option value="교실 미션">교실 미션</option>
-              <option value="특별 미션">특별 미션</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">미션 제목</label>
-            <input id="mTitle" type="text" placeholder="예: 아침 독서 20분 집중하기" class="w-full px-3 py-2 border rounded-xl" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">상세 안내</label>
-            <input id="mDesc" type="text" placeholder="미션 수행 기준을 적어주세요" class="w-full px-3 py-2 border rounded-xl" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">보너스 급여</label>
-            <input id="mReward" type="number" value="300" class="w-full px-3 py-2 border rounded-xl" />
+        <h3 class="font-extrabold text-base text-zinc-900">상점 품목 추가</h3>
+        <div class="space-y-3 text-xs">
+          <select id="shopCat" class="w-full px-3 py-2 border border-zinc-200 rounded-xl">
+            <option value="간식">간식</option>
+            <option value="티켓">티켓</option>
+            <option value="학용품">학용품</option>
+            <option value="아바타 꾸미기">아바타 꾸미기</option>
+          </select>
+          <input id="shopName" type="text" placeholder="상품명" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
+          <div class="grid grid-cols-2 gap-2">
+            <input id="shopPrice" type="number" value="1000" class="px-3 py-2 border border-zinc-200 rounded-xl" />
+            <input id="shopIcon" type="text" value="🍪" class="px-3 py-2 border border-zinc-200 rounded-xl" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-slate-500">취소</button>
-          <button onclick="createNewMission()" class="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl">등록하기</button>
+          <button onclick="closeModal()" class="px-3 py-2 text-xs font-bold text-zinc-400">취소</button>
+          <button onclick="createNewShopItem()" class="px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-xl">추가</button>
+        </div>
+      `);
+    }
+
+    function createNewShopItem() {
+      const category = document.getElementById('shopCat').value;
+      const name = document.getElementById('shopName').value.trim();
+      const price = parseInt(document.getElementById('shopPrice').value, 10) || 500;
+      const icon = document.getElementById('shopIcon').value.trim() || '🎁';
+      if (!name) return;
+      getCurrentClass().shopItems.push({
+        id: 'item-' + Date.now(), category, name, price, icon,
+        type: category === '아바타 꾸미기' ? 'avatar' : 'consumable', slot: 'hat', value: icon
+      });
+      closeModal();
+      saveState();
+      renderShopTab();
+    }
+
+    function deleteShopItem(itemId) {
+      const cls = getCurrentClass();
+      cls.shopItems = cls.shopItems.filter(i => i.id !== itemId);
+      saveState();
+      renderShopTab();
+    }
+
+    // ==================== MISSIONS & CLASS MANAGEMENT ====================
+    function openNewMissionModal() {
+      openModal(`
+        <h3 class="font-extrabold text-base text-zinc-900">새 학급 미션 등록</h3>
+        <div class="space-y-3 text-xs">
+          <select id="mType" class="w-full px-3 py-2 border border-zinc-200 rounded-xl">
+            <option value="아침 미션">아침 미션</option>
+            <option value="교실 미션">교실 미션</option>
+            <option value="특별 미션">특별 미션</option>
+          </select>
+          <input id="mTitle" type="text" placeholder="미션 제목" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
+          <input id="mDesc" type="text" placeholder="미션 설명" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
+          <input id="mReward" type="number" value="300" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button onclick="closeModal()" class="px-3 py-2 text-xs font-bold text-zinc-400">취소</button>
+          <button onclick="createNewMission()" class="px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-xl">등록</button>
         </div>
       `);
     }
@@ -1418,26 +1466,22 @@
       const title = document.getElementById('mTitle').value.trim();
       const desc = document.getElementById('mDesc').value.trim();
       const reward = parseInt(document.getElementById('mReward').value, 10) || 200;
-      if (!title) return alert('미션 제목을 입력하세요.');
-      const cls = getCurrentClass();
-      cls.missions.unshift({ id: 'm-' + Date.now(), type, title, desc, reward, completedBy: [], pendingBy: [] });
-      addLog(`[미션 등록] 새 ${type} "${title}" (보상: ${reward} ${cls.currency})`);
+      if (!title) return;
+      getCurrentClass().missions.unshift({ id: 'm-' + Date.now(), type, title, desc, reward, completedBy: [], pendingBy: [] });
       closeModal();
       saveState();
-      renderMissionsTab();
-      showToast('새 미션이 등록되었습니다.');
+      renderAll();
     }
 
     function requestMissionComplete(missionId) {
       const st = getActiveStudent();
       if (!st) return;
-      const cls = getCurrentClass();
-      const m = cls.missions.find(x => x.id === missionId);
+      const m = getCurrentClass().missions.find(x => x.id === missionId);
       if (!m.pendingBy.includes(st.id) && !m.completedBy.includes(st.id)) {
         m.pendingBy.push(st.id);
         saveState();
-        renderMissionsTab();
-        showToast('미션 완료 신청이 접수되었습니다. 선생님 승인 후 보너스가 지급됩니다.');
+        renderAll();
+        showToast('미션 완료 신청 완료! 승인 후 보너스가 지급됩니다.');
       }
     }
 
@@ -1450,148 +1494,172 @@
       if (!m.completedBy.includes(studentId)) {
         m.completedBy.push(studentId);
         st.balance += m.reward;
-        addLog(`[미션 승인] ${st.name} 학생 "${m.title}" 완료 보너스 +${m.reward} ${cls.currency} 지급`);
+        addLog(`[미션 보너스] ${st.name} · "${m.title}" (+${m.reward} ${cls.currency})`);
       }
       saveState();
       renderAll();
-      showToast(`${st.name} 학생에게 미션 보너스 ${m.reward} ${cls.currency} 지급 완료!`);
+      showToast(`${st.name} 보너스 지급 완료`);
     }
 
-    function deleteMission(missionId) {
-      const cls = getCurrentClass();
-      cls.missions = cls.missions.filter(m => m.id !== missionId);
-      saveState();
-      renderMissionsTab();
-    }
-
-    // ==================== 5. JOBS & SALARY SETTINGS ====================
-    function renderJobsTab() {
+    function renderManageTab() {
       const cls = getCurrentClass();
       const isMgr = canManageFinance();
-      const grid = document.getElementById('jobsGrid');
-      grid.innerHTML = cls.jobs.map((job, idx) => {
-        const assignedCount = cls.students.filter(s => s.jobId === job.id).length;
+
+      // Payroll table
+      document.getElementById('dashboardTableBody').innerHTML = [...cls.students].sort((a, b) => a.num - b.num).map(st => {
+        const job = cls.jobs.find(j => j.id === st.jobId);
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between space-y-3">
-            <div>
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-slate-400">#${idx + 1}</span>
-                <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">배정: ${assignedCount}명</span>
-              </div>
-              <h3 class="font-bold text-base text-slate-900 mt-1">${job.title}</h3>
-              <p class="text-xs text-slate-500 mt-1">${job.desc}</p>
+          <tr>
+            <td class="py-3 px-4 font-semibold text-zinc-500">${st.num}번</td>
+            <td class="py-3 px-4 font-bold text-zinc-900">${st.name}</td>
+            <td class="py-3 px-4 text-zinc-600">${job ? job.title : '-'}</td>
+            <td class="py-3 px-4 font-semibold">${job ? job.salary.toLocaleString() : 0} ${cls.currency}</td>
+            <td class="py-3 px-4 font-extrabold text-emerald-600">${st.balance.toLocaleString()} ${cls.currency}</td>
+            <td class="py-3 px-4 text-right space-x-1">
+              <button ${!isMgr ? 'disabled' : ''} onclick="payIndividualSalary('${st.id}')" class="px-2.5 py-1 rounded-lg bg-zinc-900 disabled:bg-zinc-200 text-white font-bold">월급</button>
+              <button ${!isMgr ? 'disabled' : ''} onclick="giveCustomBonus('${st.id}')" class="px-2.5 py-1 rounded-lg bg-zinc-100 disabled:opacity-40 text-zinc-800 font-bold">+보너스</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('transactionLog').innerHTML = cls.logs.map(l =>
+        `<div class="px-3 py-1.5 rounded-lg bg-zinc-50 text-zinc-600">${l}</div>`
+      ).join('');
+
+      // Students table
+      document.getElementById('newStudentJob').innerHTML = cls.jobs.map(j => `<option value="${j.id}">${j.title}</option>`).join('');
+      document.getElementById('studentManageTableBody').innerHTML = [...cls.students].sort((a, b) => a.num - b.num).map(st => {
+        const job = cls.jobs.find(j => j.id === st.jobId);
+        return `
+          <tr>
+            <td class="py-3 px-4 font-semibold">${st.num}번</td>
+            <td class="py-3 px-4 font-bold text-zinc-900">${st.name}</td>
+            <td class="py-3 px-4">
+              <select onchange="assignStudentJob('${st.id}', this.value)" class="px-2 py-1 border border-zinc-200 rounded-lg font-semibold">
+                ${cls.jobs.map(j => `<option value="${j.id}" ${j.id === st.jobId ? 'selected' : ''}>${j.title} (${j.salary})</option>`).join('')}
+              </select>
+            </td>
+            <td class="py-3 px-4 text-zinc-400">${job ? job.desc : '-'}</td>
+            <td class="py-3 px-4">
+              <input type="checkbox" ${st.isAdmin ? 'checked' : ''} onchange="toggleStudentAdmin('${st.id}', this.checked)" />
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="removeStudent('${st.id}')" class="text-rose-500 font-bold">삭제</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Jobs Grid
+      document.getElementById('jobsGrid').innerHTML = cls.jobs.map((job, idx) => `
+        <div class="bg-white rounded-2xl border border-zinc-200/90 p-4 flex flex-col justify-between space-y-2">
+          <div>
+            <div class="text-[11px] font-bold text-zinc-400">#${idx + 1}</div>
+            <div class="font-extrabold text-sm text-zinc-900">${job.title}</div>
+            <div class="text-xs text-zinc-500 mt-0.5">${job.desc}</div>
+          </div>
+          <div class="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
+            <span class="text-zinc-400">급여</span>
+            <div class="flex items-center gap-1">
+              <input type="number" ${!isMgr ? 'disabled' : ''} value="${job.salary}" onchange="updateJobSalary('${job.id}', this.value)" class="w-20 px-2 py-1 font-bold border border-zinc-200 rounded-lg text-right" />
+              <span class="font-semibold">${cls.currency}</span>
             </div>
-            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5">
-                <span class="text-xs text-slate-500">급여:</span>
-                <input type="number" ${!isMgr ? 'disabled' : ''} value="${job.salary}" onchange="updateJobSalary('${job.id}', this.value)" class="w-24 px-2 py-1 text-xs font-bold border border-slate-200 rounded-lg text-right" />
-                <span class="text-xs font-semibold text-slate-600">${cls.currency}</span>
-              </div>
-            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Seating Grid
+      const seatGrid = document.getElementById('seatingGrid');
+      seatGrid.style.gridTemplateColumns = `repeat(${state.seatCols}, minmax(0, 1fr))`;
+      seatGrid.innerHTML = cls.students.map((st, idx) => {
+        const job = cls.jobs.find(j => j.id === st.jobId);
+        const isSel = state.selectedSeatStudentId === st.id;
+        return `
+          <div draggable="true" ondragstart="onSeatDragStart(event, '${st.id}')" ondragover="event.preventDefault()" ondrop="onSeatDrop(event, '${st.id}')" onclick="onSeatClick('${st.id}')"
+               class="cursor-pointer p-3 rounded-xl border text-center transition ${isSel ? 'border-zinc-900 bg-zinc-100' : 'border-zinc-200 bg-zinc-50/50 hover:border-zinc-400'}">
+            <div class="text-[10px] text-zinc-400">좌석 ${idx + 1}</div>
+            <div class="text-xs font-extrabold text-zinc-900 mt-0.5">${st.num}번 ${st.name}</div>
+            <div class="text-[10px] text-zinc-500 mt-0.5">${job ? job.title : '-'}</div>
           </div>
         `;
       }).join('');
     }
 
-    function updateJobSalary(jobId, newVal) {
+    function payIndividualSalary(studentId) {
       if (!canManageFinance()) return;
       const cls = getCurrentClass();
-      const job = cls.jobs.find(j => j.id === jobId);
-      if (job) {
-        job.salary = Math.max(0, parseInt(newVal, 10) || 0);
-        saveState();
-        renderDashboard();
-        showToast(`${job.title} 급여가 ${job.salary.toLocaleString()} ${cls.currency}로 수정되었습니다.`);
-      }
+      const st = cls.students.find(s => s.id === studentId);
+      const job = cls.jobs.find(j => j.id === st.jobId);
+      const amount = job ? job.salary : 0;
+      st.balance += amount;
+      addLog(`[월급] ${st.name} · ${amount.toLocaleString()} ${cls.currency}`);
+      renderAll();
+      showToast(`${st.name} 월급 지급 완료`);
+    }
+
+    function payAllSalaries() {
+      if (!canManageFinance()) return;
+      const cls = getCurrentClass();
+      cls.students.forEach(st => {
+        const job = cls.jobs.find(j => j.id === st.jobId);
+        if (job) st.balance += job.salary;
+      });
+      addLog(`[일괄 급여] 전교생 급여 지급 완료`);
+      renderAll();
+      showToast('전원 월급 일괄 지급 완료!');
+    }
+
+    function giveCustomBonus(studentId) {
+      if (!canManageFinance()) return;
+      const cls = getCurrentClass();
+      const st = cls.students.find(s => s.id === studentId);
+      const amount = parseInt(prompt(`${st.name} 보너스 금액:`, '500'), 10);
+      if (!amount || isNaN(amount)) return;
+      st.balance += amount;
+      addLog(`[보너스] ${st.name} · +${amount.toLocaleString()} ${cls.currency}`);
+      renderAll();
+    }
+
+    function updateJobSalary(jobId, val) {
+      const job = getCurrentClass().jobs.find(j => j.id === jobId);
+      if (job) { job.salary = Math.max(0, parseInt(val, 10) || 0); saveState(); renderAll(); }
     }
 
     function openNewJobModal() {
       openModal(`
-        <h3 class="font-bold text-lg text-slate-900">새 직업 추가</h3>
-        <div class="space-y-3 text-sm">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">직업명</label>
-            <input id="newJobTitle" type="text" placeholder="예: AI 코딩 도우미" class="w-full px-3 py-2 border rounded-xl" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">역할 설명</label>
-            <input id="newJobDesc" type="text" placeholder="예: 디지털 수업 활동 및 프로그램 안내 보조" class="w-full px-3 py-2 border rounded-xl" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">기본 급여</label>
-            <input id="newJobSalary" type="number" value="1300" class="w-full px-3 py-2 border rounded-xl" />
-          </div>
+        <h3 class="font-extrabold text-base text-zinc-900">새 직업 추가</h3>
+        <div class="space-y-3 text-xs">
+          <input id="newJobTitle" type="text" placeholder="직업명" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
+          <input id="newJobDesc" type="text" placeholder="역할 설명" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
+          <input id="newJobSalary" type="number" value="1300" class="w-full px-3 py-2 border border-zinc-200 rounded-xl" />
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-slate-500">취소</button>
-          <button onclick="createNewJob()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl">추가하기</button>
+          <button onclick="closeModal()" class="px-3 py-2 text-xs font-bold text-zinc-400">취소</button>
+          <button onclick="createNewJob()" class="px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-xl">추가</button>
         </div>
       `);
     }
 
     function createNewJob() {
       const title = document.getElementById('newJobTitle').value.trim();
-      const desc = document.getElementById('newJobDesc').value.trim() || '학급 공동체 역할 수행';
+      const desc = document.getElementById('newJobDesc').value.trim() || '학급 역할 수행';
       const salary = parseInt(document.getElementById('newJobSalary').value, 10) || 1000;
-      if (!title) return alert('직업명을 입력하세요.');
-      const cls = getCurrentClass();
-      cls.jobs.push({ id: 'j-' + Date.now(), title, salary, desc });
+      if (!title) return;
+      getCurrentClass().jobs.push({ id: 'j-' + Date.now(), title, salary, desc });
       closeModal();
       saveState();
       renderAll();
-      showToast(`새 직업 "${title}"이(가) 추가되었습니다.`);
-    }
-
-    // ==================== 6. STUDENTS & EXCEL UPLOAD ====================
-    function renderStudentsTab() {
-      const cls = getCurrentClass();
-      const jobSelect = document.getElementById('newStudentJob');
-      jobSelect.innerHTML = cls.jobs.map(j => `<option value="${j.id}">${j.title} (${j.salary})</option>`).join('');
-
-      const tbody = document.getElementById('studentManageTableBody');
-      tbody.innerHTML = cls.students.sort((a, b) => a.num - b.num).map(st => {
-        const job = cls.jobs.find(j => j.id === st.jobId);
-        return `
-          <tr>
-            <td class="py-3 px-4 font-semibold">${st.num}번</td>
-            <td class="py-3 px-4 font-bold text-slate-900">${st.name}</td>
-            <td class="py-3 px-4">
-              <select onchange="assignStudentJob('${st.id}', this.value)" class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold">
-                <option value="">-- 직업 미배정 --</option>
-                ${cls.jobs.map(j => `<option value="${j.id}" ${j.id === st.jobId ? 'selected' : ''}>${j.title} (${j.salary} ${cls.currency})</option>`).join('')}
-              </select>
-            </td>
-            <td class="py-3 px-4 text-xs text-slate-500">${job ? job.desc : '직업을 선택하면 역할이 연동됩니다.'}</td>
-            <td class="py-3 px-4">
-              <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-semibold">
-                <input type="checkbox" ${st.isAdmin ? 'checked' : ''} onchange="toggleStudentAdmin('${st.id}', this.checked)" class="rounded text-indigo-600" />
-                <span>급여지급 관리자</span>
-              </label>
-            </td>
-            <td class="py-3 px-4 text-right">
-              <button onclick="removeStudent('${st.id}')" class="text-xs text-rose-500 hover:underline font-semibold">삭제</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
     }
 
     function assignStudentJob(studentId, jobId) {
-      const cls = getCurrentClass();
-      const st = cls.students.find(s => s.id === studentId);
-      st.jobId = jobId;
-      saveState();
-      renderAll();
-      showToast(`${st.name} 학생의 직업이 변경되었습니다.`);
+      const st = getCurrentClass().students.find(s => s.id === studentId);
+      if (st) { st.jobId = jobId; saveState(); renderAll(); }
     }
 
     function toggleStudentAdmin(studentId, checked) {
-      const cls = getCurrentClass();
-      const st = cls.students.find(s => s.id === studentId);
-      st.isAdmin = checked;
-      saveState();
-      renderAll();
-      showToast(`${st.name} 학생의 관리자 권한이 ${checked ? '부여' : '해제'}되었습니다.`);
+      const st = getCurrentClass().students.find(s => s.id === studentId);
+      if (st) { st.isAdmin = checked; saveState(); renderAll(); }
     }
 
     function addSingleStudent() {
@@ -1599,17 +1667,16 @@
       const num = parseInt(document.getElementById('newStudentNum').value, 10) || (cls.students.length + 1);
       const name = document.getElementById('newStudentName').value.trim();
       const jobId = document.getElementById('newStudentJob').value;
-      if (!name) return alert('학생 이름을 입력하세요.');
+      if (!name) return;
       cls.students.push({
         id: 's-' + Date.now(), num, name, jobId, isAdmin: false, balance: 1000,
         portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: [],
-        equipped: { hat: '', glasses: '', shirtColor: '#4f46e5', shirtName: '기본 의상' },
+        equipped: { hat: '', glasses: '', shirtColor: '#881337', pet: '' },
         x: (Math.random() - 0.5) * 6, z: (Math.random() - 0.5) * 4, isSitting: false, chat: ''
       });
       document.getElementById('newStudentName').value = '';
       saveState();
       renderAll();
-      showToast(`${name} 학생이 등록되었습니다.`);
     }
 
     function removeStudent(studentId) {
@@ -1620,13 +1687,11 @@
     }
 
     function downloadSampleExcel() {
-      const rows = [
+      const ws = XLSX.utils.json_to_sheet([
         { 번호: 1, 이름: '김민준', 직업: '은행원' },
         { 번호: 2, 이름: '이서윤', 직업: '학급 회장' },
-        { 번호: 3, 이름: '박도윤', 직업: '체육 기자재 관리자' },
-        { 번호: 4, 이름: '최지우', 직업: '뉴스 앵커' }
-      ];
-      const ws = XLSX.utils.json_to_sheet(rows);
+        { 번호: 3, 이름: '박도윤', 직업: '체육 기자재 관리자' }
+      ]);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, '학생명단');
       XLSX.writeFile(wb, '우리반_학생명단_샘플.xlsx');
@@ -1637,119 +1702,50 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function (e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet);
-        if (!json.length) return alert('엑셀 데이터가 비어 있습니다.');
-
+        const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        if (!json.length) return;
         const cls = getCurrentClass();
-        const colors = ['#4f46e5', '#059669', '#dc2626', '#d97706', '#7c3aed', '#0284c7'];
         cls.students = json.map((row, idx) => {
-          const num = parseInt(row['번호'] || row['number'] || (idx + 1), 10);
-          const name = String(row['이름'] || row['name'] || `학생${idx + 1}`).trim();
-          const jobTitle = String(row['직업'] || row['job'] || '').trim();
+          const num = parseInt(row['번호'] || (idx + 1), 10);
+          const name = String(row['이름'] || `학생${idx + 1}`).trim();
+          const jobTitle = String(row['직업'] || '').trim();
           const matchedJob = cls.jobs.find(j => j.title === jobTitle) || cls.jobs[idx % cls.jobs.length];
           return {
-            id: 's-xl-' + Date.now() + '-' + idx,
-            num,
-            name,
-            jobId: matchedJob ? matchedJob.id : '',
-            isAdmin: idx === 0,
-            balance: 1000,
-            portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 },
-            inventory: [],
-            equipped: { hat: '', glasses: '', shirtColor: colors[idx % colors.length], shirtName: '기본 의상' },
-            x: ((idx % 4) - 1.5) * 2.2,
-            z: (Math.floor(idx / 4) - 1) * 2.0,
-            isSitting: false,
-            chat: ''
+            id: 's-xl-' + Date.now() + '-' + idx, num, name, jobId: matchedJob ? matchedJob.id : '',
+            isAdmin: idx === 0, balance: 1000, portfolio: { gold: 0, stock: 0, bond: 0, coin: 0 }, inventory: [],
+            equipped: { hat: '', glasses: '', shirtColor: '#881337', pet: '' },
+            x: ((idx % 4) - 1.5) * 2.2, z: (Math.floor(idx / 4) - 1) * 2.0, isSitting: false, chat: ''
           };
         });
-        addLog(`[엑셀 등록] ${file.name} 파일에서 학생 ${cls.students.length}명 명단 일괄 업로드 완료`);
+        state.activeUserId = cls.students[0].id;
         saveState();
         renderAll();
-        showToast(`엑셀에서 ${cls.students.length}명의 학생 명단을 불러왔습니다!`);
+        showToast(`${cls.students.length}명 엑셀 등록 완료`);
       };
       reader.readAsArrayBuffer(file);
     }
 
-    // ==================== 7. SEATING CHART ====================
-    function renderSeatingTab() {
-      const cls = getCurrentClass();
-      const grid = document.getElementById('seatingGrid');
-      grid.style.gridTemplateColumns = `repeat(${state.seatCols}, minmax(0, 1fr))`;
-
-      grid.innerHTML = cls.students.map((st, idx) => {
-        const job = cls.jobs.find(j => j.id === st.jobId);
-        const isSelected = state.selectedSeatStudentId === st.id;
-        return `
-          <div draggable="true"
-               ondragstart="onSeatDragStart(event, '${st.id}')"
-               ondragover="event.preventDefault()"
-               ondrop="onSeatDrop(event, '${st.id}')"
-               onclick="onSeatClick('${st.id}')"
-               class="cursor-pointer p-3.5 rounded-2xl border-2 transition select-none text-center ${isSelected ? 'border-indigo-600 bg-indigo-50 shadow-md scale-[1.02]' : 'border-slate-200 bg-amber-50/40 hover:border-slate-400'}">
-            <div class="text-[11px] font-bold text-slate-400">좌석 ${idx + 1}</div>
-            <div class="text-base font-extrabold text-slate-900 mt-0.5">${st.num}번 ${st.name}</div>
-            <div class="text-[11px] font-semibold text-indigo-600 mt-1">${job ? job.title : '직업 없음'}</div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function changeSeatCols(cols) {
-      state.seatCols = parseInt(cols, 10) || 4;
-      saveState();
-      renderSeatingTab();
-    }
-
+    function changeSeatCols(cols) { state.seatCols = parseInt(cols, 10) || 4; saveState(); renderManageTab(); }
     function onSeatClick(studentId) {
-      if (!state.selectedSeatStudentId) {
-        state.selectedSeatStudentId = studentId;
-        renderSeatingTab();
-        return;
-      }
-      if (state.selectedSeatStudentId !== studentId) {
-        swapSeats(state.selectedSeatStudentId, studentId);
-      }
+      if (!state.selectedSeatStudentId) { state.selectedSeatStudentId = studentId; renderManageTab(); return; }
+      if (state.selectedSeatStudentId !== studentId) swapSeats(state.selectedSeatStudentId, studentId);
       state.selectedSeatStudentId = null;
-      renderSeatingTab();
+      renderManageTab();
     }
-
-    function onSeatDragStart(e, studentId) {
-      e.dataTransfer.setData('text/plain', studentId);
-    }
-
+    function onSeatDragStart(e, studentId) { e.dataTransfer.setData('text/plain', studentId); }
     function onSeatDrop(e, targetId) {
       e.preventDefault();
       const sourceId = e.dataTransfer.getData('text/plain');
-      if (sourceId && sourceId !== targetId) {
-        swapSeats(sourceId, targetId);
-        renderSeatingTab();
-      }
+      if (sourceId && sourceId !== targetId) { swapSeats(sourceId, targetId); renderManageTab(); }
     }
-
     function swapSeats(idA, idB) {
       const cls = getCurrentClass();
       const idxA = cls.students.findIndex(s => s.id === idA);
       const idxB = cls.students.findIndex(s => s.id === idB);
-      if (idxA > -1 && idxB > -1) {
-        const temp = cls.students[idxA];
-        cls.students[idxA] = cls.students[idxB];
-        cls.students[idxB] = temp;
-        saveState();
-        showToast('자리가 변경되었습니다.');
-      }
+      if (idxA > -1 && idxB > -1) { [cls.students[idxA], cls.students[idxB]] = [cls.students[idxB], cls.students[idxA]]; saveState(); }
     }
-
-    function sortSeatsByNumber() {
-      const cls = getCurrentClass();
-      cls.students.sort((a, b) => a.num - b.num);
-      saveState();
-      renderSeatingTab();
-    }
-
+    function sortSeatsByNumber() { getCurrentClass().students.sort((a, b) => a.num - b.num); saveState(); renderManageTab(); }
     function shuffleSeats() {
       const cls = getCurrentClass();
       for (let i = cls.students.length - 1; i > 0; i--) {
@@ -1757,182 +1753,27 @@
         [cls.students[i], cls.students[j]] = [cls.students[j], cls.students[i]];
       }
       saveState();
-      renderSeatingTab();
-      showToast('자리를 무작위로 재배치했습니다!');
+      renderManageTab();
     }
 
-    // ==================== 8. SHOP & AVATAR CUSTOMIZATION ====================
-    function renderShopTab() {
-      const cls = getCurrentClass();
-      const st = getActiveStudent() || cls.students[0];
-      const isMgr = canManageFinance();
-
-      if (st) {
-        document.getElementById('shopUserBalance').textContent = `${st.balance.toLocaleString()} ${cls.currency}`;
-        document.getElementById('avatarHatPreview').textContent = st.equipped?.hat || '';
-        document.getElementById('avatarGlassesPreview').textContent = st.equipped?.glasses || '';
-        document.getElementById('avatarShirtPreview').style.backgroundColor = st.equipped?.shirtColor || '#4f46e5';
-
-        const invEl = document.getElementById('userInventoryList');
-        if (!st.inventory || st.inventory.length === 0) {
-          invEl.innerHTML = `<span class="text-xs text-slate-400">보유한 아이템이 없습니다.</span>`;
-        } else {
-          invEl.innerHTML = st.inventory.map(itemId => {
-            const item = cls.shopItems.find(i => i.id === itemId);
-            if (!item) return '';
-            const isEquipped = item.type === 'avatar' && st.equipped && st.equipped[item.slot] === item.value;
-            return `
-              <button onclick="toggleEquipItem('${item.id}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${isEquipped ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200'}">
-                ${item.icon} ${item.name} ${item.type === 'avatar' ? (isEquipped ? '(장착중)' : '(장착)') : ''}
-              </button>
-            `;
-          }).join('');
-        }
-      }
-
-      const grid = document.getElementById('shopItemsGrid');
-      grid.innerHTML = cls.shopItems.map(item => `
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl">${item.icon}</div>
-            <div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">${item.category}</span>
-              <div class="font-bold text-sm text-slate-900 mt-0.5">${item.name}</div>
-              <div class="text-xs font-extrabold text-emerald-600 mt-0.5">${item.price.toLocaleString()} ${cls.currency}</div>
-            </div>
-          </div>
-          <div class="flex flex-col items-end gap-1.5">
-            <button onclick="buyShopItem('${item.id}')" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
-              구매하기
-            </button>
-            ${isMgr ? `<button onclick="deleteShopItem('${item.id}')" class="text-[11px] text-rose-500 hover:underline">품목 삭제</button>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function buyShopItem(itemId) {
-      const cls = getCurrentClass();
-      const st = getActiveStudent() || cls.students[0];
-      if (!st) return;
-      const item = cls.shopItems.find(i => i.id === itemId);
-      if (st.balance < item.price) return alert('잔액이 부족합니다!');
-      st.balance -= item.price;
-      if (!st.inventory) st.inventory = [];
-      st.inventory.push(item.id);
-      if (item.type === 'avatar') {
-        st.equipped[item.slot] = item.value;
-      }
-      addLog(`[상점 구매] ${st.name} 학생이 "${item.name}" 구매 (-${item.price.toLocaleString()} ${cls.currency})`);
-      saveState();
-      renderAll();
-      if (threeScene) rebuild3DStudents();
-      showToast(`"${item.name}" 구매 완료!`);
-    }
-
-    function toggleEquipItem(itemId) {
-      const cls = getCurrentClass();
-      const st = getActiveStudent() || cls.students[0];
-      const item = cls.shopItems.find(i => i.id === itemId);
-      if (!item || item.type !== 'avatar') return;
-      if (st.equipped[item.slot] === item.value) {
-        st.equipped[item.slot] = item.slot === 'shirtColor' ? '#4f46e5' : '';
-      } else {
-        st.equipped[item.slot] = item.value;
-      }
-      saveState();
-      renderShopTab();
-      if (threeScene) rebuild3DStudents();
-    }
-
-    function openNewShopItemModal() {
-      openModal(`
-        <h3 class="font-bold text-lg text-slate-900">상점 품목 추가</h3>
-        <div class="space-y-3 text-sm">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">카테고리</label>
-            <select id="shopCat" class="w-full px-3 py-2 border rounded-xl">
-              <option value="간식">간식</option>
-              <option value="티켓">티켓</option>
-              <option value="학용품">학용품</option>
-              <option value="아바타 꾸미기">아바타 꾸미기</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">상품명</label>
-            <input id="shopName" type="text" placeholder="예: 초코 쿠키 교환권" class="w-full px-3 py-2 border rounded-xl" />
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">가격</label>
-              <input id="shopPrice" type="number" value="1000" class="w-full px-3 py-2 border rounded-xl" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">아이콘(이모지)</label>
-              <input id="shopIcon" type="text" value="🍪" class="w-full px-3 py-2 border rounded-xl" />
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-slate-500">취소</button>
-          <button onclick="createNewShopItem()" class="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl">추가하기</button>
-        </div>
-      `);
-    }
-
-    function createNewShopItem() {
-      const category = document.getElementById('shopCat').value;
-      const name = document.getElementById('shopName').value.trim();
-      const price = parseInt(document.getElementById('shopPrice').value, 10) || 500;
-      const icon = document.getElementById('shopIcon').value.trim() || '🎁';
-      if (!name) return alert('상품명을 입력하세요.');
-      const cls = getCurrentClass();
-      cls.shopItems.push({
-        id: 'item-' + Date.now(),
-        category,
-        name,
-        price,
-        icon,
-        type: category === '아바타 꾸미기' ? 'avatar' : 'consumable',
-        slot: 'hat',
-        value: icon
-      });
-      closeModal();
-      saveState();
-      renderShopTab();
-      showToast(`상점에 "${name}" 품목이 추가되었습니다.`);
-    }
-
-    function deleteShopItem(itemId) {
-      const cls = getCurrentClass();
-      cls.shopItems = cls.shopItems.filter(i => i.id !== itemId);
-      saveState();
-      renderShopTab();
-    }
-
-    // ==================== MODAL HELPERS & INIT ====================
     function openModal(html) {
-      const backdrop = document.getElementById('modalBackdrop');
+      const b = document.getElementById('modalBackdrop');
       document.getElementById('modalContent').innerHTML = html;
-      backdrop.classList.remove('hidden');
-      backdrop.classList.add('flex');
+      b.classList.remove('hidden');
+      b.classList.add('flex');
     }
-
     function closeModal() {
-      const backdrop = document.getElementById('modalBackdrop');
-      backdrop.classList.add('hidden');
-      backdrop.classList.remove('flex');
+      const b = document.getElementById('modalBackdrop');
+      b.classList.add('hidden');
+      b.classList.remove('flex');
     }
 
     function renderAll() {
       renderHeaderSelectors();
-      renderDashboard();
+      renderHomeTab();
       renderInvestTab();
-      renderMissionsTab();
-      renderJobsTab();
-      renderStudentsTab();
-      renderSeatingTab();
       renderShopTab();
+      renderManageTab();
       lucide.createIcons();
     }
 
