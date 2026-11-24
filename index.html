@@ -1120,28 +1120,115 @@ const DAILY_TV_RULES = [
       floor.name = 'classroomFloor';
       threeScene.add(floor);
 
-      // Front, Back, Left, Right Walls
+      // High Classroom Ceiling (층고 6.8m) & Tall Walls
+      const ceilingHeight = 6.8;
+      const ceilingMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(16.2, 0.25, 15.2),
+        new THREE.MeshStandardMaterial({ color: 0xf1f5f9 })
+      );
+      ceilingMesh.position.set(0, ceilingHeight + 0.12, 0);
+      threeScene.add(ceilingMesh);
+
       const wallMat = new THREE.MeshStandardMaterial({ color: 0xfafafa });
-      const frontWall = new THREE.Mesh(new THREE.BoxGeometry(16, 4.5, 0.2), wallMat);
-      frontWall.position.set(0, 2.25, -7.5);
+      const frontWall = new THREE.Mesh(new THREE.BoxGeometry(16, ceilingHeight, 0.2), wallMat);
+      frontWall.position.set(0, ceilingHeight / 2, -7.5);
       threeScene.add(frontWall);
 
-      const backWall = new THREE.Mesh(new THREE.BoxGeometry(16, 4.5, 0.2), wallMat);
-      backWall.position.set(0, 2.25, 7.5);
+      const backWall = new THREE.Mesh(new THREE.BoxGeometry(16, ceilingHeight, 0.2), wallMat);
+      backWall.position.set(0, ceilingHeight / 2, 7.5);
       threeScene.add(backWall);
 
-      const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.5, 15), wallMat);
-      leftWall.position.set(-8, 2.25, 0);
-      threeScene.add(leftWall);
+      const leftWallLower = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.2, 15), wallMat);
+      leftWallLower.position.set(-8.0, 0.6, 0);
+      threeScene.add(leftWallLower);
+
+      const leftWallUpper = new THREE.Mesh(new THREE.BoxGeometry(0.24, ceilingHeight - 3.3, 15), wallMat);
+      leftWallUpper.position.set(-8.0, 3.3 + (ceilingHeight - 3.3) / 2, 0);
+      threeScene.add(leftWallUpper);
+
+      const leftPillars = [-7.2, -5.0, -2.2, 1.4, 5.0, 7.2];
+      leftPillars.forEach(lz => {
+        const lp = new THREE.Mesh(new THREE.BoxGeometry(0.26, 2.2, 0.45), wallMat);
+        lp.position.set(-8.0, 2.2, lz);
+        threeScene.add(lp);
+      });
 
       // Right Wall with Hallway Corridor & Corridor-Facing Windows (복도를 향한 창문)
-      const rightWallLower = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.15, 15), wallMat);
-      rightWallLower.position.set(8.0, 0.575, 0);
+      const rightWallLower = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.2, 15), wallMat);
+      rightWallLower.position.set(8.0, 0.6, 0);
       threeScene.add(rightWallLower);
 
-      const rightWallUpper = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.9, 15), wallMat);
-      rightWallUpper.position.set(8.0, 4.05, 0);
+      const rightWallUpper = new THREE.Mesh(new THREE.BoxGeometry(0.24, ceilingHeight - 3.3, 15), wallMat);
+      rightWallUpper.position.set(8.0, 3.3 + (ceilingHeight - 3.3) / 2, 0);
       threeScene.add(rightWallUpper);
+
+      // ==================== CEILING LIGHTS (전등), AIR CONDITIONER (에어컨) & FANS (선풍기들) ====================
+      const ceilingLightGroup = new THREE.Group();
+      const lightHousingMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0 });
+      const lightGlowMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xfffbeb,
+        emissiveIntensity: 0.85
+      });
+
+      // 2 rows x 3 cols = 6 Classroom LED Ceiling Lights (전등)
+      [-3.8, 0.0, 3.8].forEach(lx => {
+        [-3.0, 2.2].forEach(lz => {
+          const housing = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.45), lightHousingMat);
+          housing.position.set(lx, ceilingHeight - 0.05, lz);
+          const tube = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.06, 0.32), lightGlowMat);
+          tube.position.set(lx, ceilingHeight - 0.11, lz);
+          ceilingLightGroup.add(housing, tube);
+        });
+      });
+      threeScene.add(ceilingLightGroup);
+
+      // Classroom Air Conditioner (에어컨) mounted on front-right upper wall
+      const acGroup = new THREE.Group();
+      const acBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.42, 0.36), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+      const acVane = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+      acVane.position.set(0, -0.16, 0.18);
+      acGroup.add(acBody, acVane);
+      acGroup.position.set(5.4, 4.9, -7.25);
+      threeScene.add(acGroup);
+
+      // Ceiling & Wall Fans (선풍기들) that spin smoothly in animateThreeClassroom!
+      window.classroomFans = [];
+      const fanRodMat = new THREE.MeshStandardMaterial({ color: 0x52525b });
+      const fanBladeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, side: THREE.DoubleSide });
+      const fanHubMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+
+      const fanCoords = [
+        { x: -2.2, y: ceilingHeight - 0.85, z: -1.6 },
+        { x: 2.2,  y: ceilingHeight - 0.85, z: -1.6 },
+        { x: -2.2, y: ceilingHeight - 0.85, z: 2.4 },
+        { x: 2.2,  y: ceilingHeight - 0.85, z: 2.4 }
+      ];
+
+      fanCoords.forEach(fc => {
+        const fGroup = new THREE.Group();
+        fGroup.position.set(fc.x, fc.y, fc.z);
+
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 8), fanRodMat);
+        rod.position.y = 0.425;
+        fGroup.add(rod);
+
+        const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.16, 12), fanHubMat);
+        fGroup.add(motor);
+
+        const rotor = new THREE.Group();
+        rotor.position.y = -0.04;
+        for (let b = 0; b < 4; b++) {
+          const blade = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.02, 0.16), fanBladeMat);
+          const ang = (b * Math.PI) / 2;
+          blade.position.set(Math.cos(ang) * 0.36, 0, Math.sin(ang) * 0.36);
+          blade.rotation.y = -ang;
+          rotor.add(blade);
+        }
+        fGroup.add(rotor);
+        threeScene.add(fGroup);
+        window.classroomFans.push(rotor);
+      });
 
       const rightPillars = [-7.2, -3.6, 0.0, 3.6, 7.2];
       rightPillars.forEach(rz => {
@@ -1229,58 +1316,7 @@ const DAILY_TV_RULES = [
       womenSign.rotation.y = -Math.PI / 2;
       threeScene.add(womenSign);
 
-      // Exterior School Building Wings & Courtyard seen when zooming out
-      const schoolGroup = new THREE.Group();
-      const bldgMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9 });
-      const brickMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
 
-      // Main outer school building shell around & adjacent to the classroom
-      const outerWingBack = new THREE.Mesh(new THREE.BoxGeometry(28, 9.2, 1.2), bldgMat);
-      outerWingBack.position.set(3, 4.5, -13.5);
-      schoolGroup.add(outerWingBack);
-
-      const outerWingRight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 9.2, 28), bldgMat);
-      outerWingRight.position.set(16.5, 4.5, 0);
-      schoolGroup.add(outerWingRight);
-
-      const outerWingLeft = new THREE.Mesh(new THREE.BoxGeometry(1.2, 9.2, 28), bldgMat);
-      outerWingLeft.position.set(-13.5, 4.5, 0);
-      schoolGroup.add(outerWingLeft);
-
-      const outerWingFront = new THREE.Mesh(new THREE.BoxGeometry(28, 9.2, 1.2), bldgMat);
-      outerWingFront.position.set(3, 4.5, 13.5);
-      schoolGroup.add(outerWingFront);
-
-      // Decorative school facade trim & schoolyard ground outside
-      const schoolYard = new THREE.Mesh(new THREE.BoxGeometry(56, 0.16, 56), new THREE.MeshStandardMaterial({ color: 0xcbd5e1 }));
-      schoolYard.position.set(2, -0.22, 0);
-      schoolGroup.add(schoolYard);
-
-      const playgroundSand = new THREE.Mesh(new THREE.BoxGeometry(22, 0.14, 14), new THREE.MeshStandardMaterial({ color: 0xe7d3b0 }));
-      playgroundSand.position.set(2, -0.2, 25);
-      schoolGroup.add(playgroundSand);
-
-      // Neighboring school classroom block across the courtyard
-      const annexBlock = new THREE.Mesh(new THREE.BoxGeometry(20, 8.5, 6), brickMat);
-      annexBlock.position.set(2, 4.15, -24);
-      schoolGroup.add(annexBlock);
-
-      const annexRoof = new THREE.Mesh(new THREE.BoxGeometry(21, 0.6, 7), roofMat);
-      annexRoof.position.set(2, 8.65, -24);
-      schoolGroup.add(annexRoof);
-
-      // Exterior windows on school building
-      const extWinMat = new THREE.MeshStandardMaterial({ color: 0x7dd3fc });
-      [-15, -9, -3, 3, 9, 15].forEach(wx => {
-        [2.5, 6.2].forEach(wy => {
-          const ew = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 0.2), extWinMat);
-          ew.position.set(wx, wy, -12.88);
-          schoolGroup.add(ew);
-        });
-      });
-
-      threeScene.add(schoolGroup);
 
       // 3 Sunlit Classroom Windows on Left Wall
       [-3.6, 0.0, 3.6].forEach(zPos => threeScene.add(createClassroomWindow(zPos)));
@@ -1995,6 +2031,11 @@ const DAILY_TV_RULES = [
           }
         });
 
+        if (window.classroomFans && window.classroomFans.length) {
+          window.classroomFans.forEach(rotor => {
+            rotor.rotation.y += 0.14;
+          });
+        }
         threeRenderer.render(threeScene, threeCamera);
       }
     }
