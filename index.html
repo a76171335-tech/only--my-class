@@ -859,7 +859,7 @@
     }
 
     function adjustCameraZoom(delta) {
-      camDist = Math.max(5.5, Math.min(23, camDist + delta));
+      camDist = Math.max(5.5, Math.min(36, camDist + delta));
       updateCameraOrbit();
     }
 
@@ -931,22 +931,82 @@
       return new THREE.CanvasTexture(canvas);
     }
 
-    // Draw Classroom TV Screen Texture
-    function createTVScreenTexture() {
+const DAILY_TV_RULES = [
+      {
+        dayTitle: "Day 1 오늘의 학교 규칙",
+        headline: "복도와 계단에서는 걷고, 바른말을 사용해요",
+        rule1: "• 수업 시작 1분 전 자리에 앉아 수업을 준비해요.",
+        rule2: "• 친구와 다투지 않고 고운 말·바른 말을 써요."
+      },
+      {
+        dayTitle: "Day 2 오늘의 학교 규칙",
+        headline: "급식실 질서 지키기와 잔반 줄이기 실천",
+        rule1: "• 차례를 지켜 줄을 서고 조용히 식사해요.",
+        rule2: "• 먹을 만큼만 덜어 먹고 깨끗하게 정리해요."
+      },
+      {
+        dayTitle: "Day 3 오늘의 학교 규칙",
+        headline: "교실·사물함 정돈과 에너지 절약 습관",
+        rule1: "• 내 자리 주변 쓰레기를 줍고 의자를 넣어요.",
+        rule2: "• 자리에서 일어날 때 전등과 기기를 확인해요."
+      },
+      {
+        dayTitle: "Day 4 오늘의 학교 규칙",
+        headline: "스마트기기 바른 사용과 서로 존중하기",
+        rule1: "• 수업 목적에 맞게 태블릿과 컴퓨터를 사용해요.",
+        rule2: "• 다른 사람의 물건과 의견을 소중히 여겨요."
+      }
+    ];
+
+    let tvScreenMesh = null;
+
+    function createTVScreenTexture(dayCount = 1) {
+      const rule = DAILY_TV_RULES[(Math.max(1, dayCount) - 1) % DAILY_TV_RULES.length];
       const canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 180;
+      canvas.width = 480;
+      canvas.height = 270;
       const ctx = canvas.getContext('2d');
+
       ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, 320, 180);
+      ctx.fillRect(0, 0, 480, 270);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(18, 18, 444, 234);
+
       ctx.fillStyle = '#38bdf8';
-      ctx.font = 'bold 20px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('우리반 경제·금융 보드', 160, 75);
+      ctx.font = 'bold 17px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(rule.dayTitle, 34, 52);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 21px sans-serif';
+      ctx.fillText(rule.headline.slice(0, 24), 34, 88);
+
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(34, 108);
+      ctx.lineTo(446, 108);
+      ctx.stroke();
+
       ctx.fillStyle = '#a7f3d0';
-      ctx.font = '14px sans-serif';
-      ctx.fillText('오늘의 아침 미션 & 투자 브리핑', 160, 110);
-      return new THREE.CanvasTexture(canvas);
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText(rule.rule1, 34, 148);
+
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText(rule.rule2, 34, 192);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      return tex;
+    }
+
+    function refreshClassroomTV() {
+      if (!tvScreenMesh) return;
+      const cls = getCurrentClass();
+      tvScreenMesh.material.map = createTVScreenTexture(cls.dayCount || 1);
+      tvScreenMesh.material.needsUpdate = true;
     }
 
     function createClassroomWindow(zPos) {
@@ -1031,9 +1091,101 @@
       leftWall.position.set(-8, 2.25, 0);
       threeScene.add(leftWall);
 
-      const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.5, 15), wallMat);
-      rightWall.position.set(8, 2.25, 0);
-      threeScene.add(rightWall);
+      // Right Wall with Hallway Corridor & Corridor-Facing Windows (복도를 향한 창문)
+      const rightWallLower = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.15, 15), wallMat);
+      rightWallLower.position.set(8.0, 0.575, 0);
+      threeScene.add(rightWallLower);
+
+      const rightWallUpper = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.9, 15), wallMat);
+      rightWallUpper.position.set(8.0, 4.05, 0);
+      threeScene.add(rightWallUpper);
+
+      const rightPillars = [-7.2, -3.6, 0.0, 3.6, 7.2];
+      rightPillars.forEach(rz => {
+        const rp = new THREE.Mesh(new THREE.BoxGeometry(0.26, 2.5, 0.6), wallMat);
+        rp.position.set(8.0, 2.35, rz);
+        threeScene.add(rp);
+      });
+
+      const hallWinMat = new THREE.MeshStandardMaterial({
+        color: 0xfef9c3,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.22,
+        transparent: true,
+        opacity: 0.65
+      });
+      const hallFrameMat = new THREE.MeshStandardMaterial({ color: 0x52525b });
+      [-5.4, -1.8, 1.8, 5.4].forEach(hz => {
+        const hGlass = new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.1, 2.9), hallWinMat);
+        hGlass.position.set(8.0, 2.35, hz);
+        threeScene.add(hGlass);
+
+        const hMid = new THREE.Mesh(new THREE.BoxGeometry(0.14, 2.2, 0.07), hallFrameMat);
+        hMid.position.set(8.0, 2.35, hz);
+        threeScene.add(hMid);
+
+        const hSill = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.1, 3.0), new THREE.MeshStandardMaterial({ color: 0xe4e4e7 }));
+        hSill.position.set(8.0, 1.18, hz);
+        threeScene.add(hSill);
+      });
+
+      // Hallway corridor floor & outer hallway wall visible through corridor windows & when zooming out
+      const hallFloor = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.2, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+      hallFloor.position.set(10.1, -0.1, 0);
+      threeScene.add(hallFloor);
+
+      // Exterior School Building Wings & Courtyard seen when zooming out
+      const schoolGroup = new THREE.Group();
+      const bldgMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9 });
+      const brickMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+
+      // Main outer school building shell around & adjacent to the classroom
+      const outerWingBack = new THREE.Mesh(new THREE.BoxGeometry(28, 9.2, 1.2), bldgMat);
+      outerWingBack.position.set(3, 4.5, -13.5);
+      schoolGroup.add(outerWingBack);
+
+      const outerWingRight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 9.2, 28), bldgMat);
+      outerWingRight.position.set(16.5, 4.5, 0);
+      schoolGroup.add(outerWingRight);
+
+      const outerWingLeft = new THREE.Mesh(new THREE.BoxGeometry(1.2, 9.2, 28), bldgMat);
+      outerWingLeft.position.set(-13.5, 4.5, 0);
+      schoolGroup.add(outerWingLeft);
+
+      const outerWingFront = new THREE.Mesh(new THREE.BoxGeometry(28, 9.2, 1.2), bldgMat);
+      outerWingFront.position.set(3, 4.5, 13.5);
+      schoolGroup.add(outerWingFront);
+
+      // Decorative school facade trim & schoolyard ground outside
+      const schoolYard = new THREE.Mesh(new THREE.BoxGeometry(56, 0.16, 56), new THREE.MeshStandardMaterial({ color: 0xcbd5e1 }));
+      schoolYard.position.set(2, -0.22, 0);
+      schoolGroup.add(schoolYard);
+
+      const playgroundSand = new THREE.Mesh(new THREE.BoxGeometry(22, 0.14, 14), new THREE.MeshStandardMaterial({ color: 0xe7d3b0 }));
+      playgroundSand.position.set(2, -0.2, 25);
+      schoolGroup.add(playgroundSand);
+
+      // Neighboring school classroom block across the courtyard
+      const annexBlock = new THREE.Mesh(new THREE.BoxGeometry(20, 8.5, 6), brickMat);
+      annexBlock.position.set(2, 4.15, -24);
+      schoolGroup.add(annexBlock);
+
+      const annexRoof = new THREE.Mesh(new THREE.BoxGeometry(21, 0.6, 7), roofMat);
+      annexRoof.position.set(2, 8.65, -24);
+      schoolGroup.add(annexRoof);
+
+      // Exterior windows on school building
+      const extWinMat = new THREE.MeshStandardMaterial({ color: 0x7dd3fc });
+      [-15, -9, -3, 3, 9, 15].forEach(wx => {
+        [2.5, 6.2].forEach(wy => {
+          const ew = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 0.2), extWinMat);
+          ew.position.set(wx, wy, -12.88);
+          schoolGroup.add(ew);
+        });
+      });
+
+      threeScene.add(schoolGroup);
 
       // 3 Sunlit Classroom Windows on Left Wall
       [-3.6, 0.0, 3.6].forEach(zPos => threeScene.add(createClassroomWindow(zPos)));
@@ -1091,36 +1243,39 @@
       tChairBack.position.set(tDeskX, 0.78, tDeskZ - 1.05);
       threeScene.add(tChairBack);
 
-      // 2 Computers (Monitors + Stands + Keyboards) on Teacher's Desk
+      // 2 Computers facing Teacher Chair (-Z direction, so screen faces -Z toward teacher chair)
       [-0.58, 0.58].forEach(offsetX => {
         const monStand = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.18, 0.12), new THREE.MeshStandardMaterial({ color: 0x27272a }));
-        monStand.position.set(tDeskX + offsetX, 0.92, tDeskZ - 0.15);
+        monStand.position.set(tDeskX + offsetX, 0.92, tDeskZ + 0.12);
         threeScene.add(monStand);
 
         const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.48, 0.06), new THREE.MeshStandardMaterial({ color: 0x18181b }));
-        monitor.position.set(tDeskX + offsetX, 1.18, tDeskZ - 0.15);
+        monitor.position.set(tDeskX + offsetX, 1.18, tDeskZ + 0.12);
         threeScene.add(monitor);
 
+        // Screen faces -Z (toward teacher chair at tDeskZ - 0.75)
         const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.68, 0.42), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
-        screen.position.set(tDeskX + offsetX, 1.18, tDeskZ - 0.11);
+        screen.position.set(tDeskX + offsetX, 1.18, tDeskZ + 0.085);
+        screen.rotation.y = Math.PI;
         threeScene.add(screen);
 
         const kb = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.03, 0.18), new THREE.MeshStandardMaterial({ color: 0x3f3f46 }));
-        kb.position.set(tDeskX + offsetX, 0.85, tDeskZ + 0.18);
+        kb.position.set(tDeskX + offsetX, 0.85, tDeskZ - 0.22);
         threeScene.add(kb);
       });
 
-      // Large Classroom TV mounted above Teacher's Desk facing Students
-      const tvBezel = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.55, 0.14), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+      // Large Classroom TV mounted above Teacher's Desk facing Students (+Z) with daily school rules
+      const tvBezel = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.62, 0.14), new THREE.MeshStandardMaterial({ color: 0x18181b }));
       tvBezel.position.set(tDeskX, 2.55, -7.28);
       threeScene.add(tvBezel);
 
-      const tvScreen = new THREE.Mesh(
-        new THREE.PlaneGeometry(2.44, 1.4),
-        new THREE.MeshBasicMaterial({ map: createTVScreenTexture() })
+      const clsForTv = getCurrentClass();
+      tvScreenMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.64, 1.48),
+        new THREE.MeshBasicMaterial({ map: createTVScreenTexture(clsForTv.dayCount || 1) })
       );
-      tvScreen.position.set(tDeskX, 2.55, -7.2);
-      threeScene.add(tvScreen);
+      tvScreenMesh.position.set(tDeskX, 2.55, -7.2);
+      threeScene.add(tvScreenMesh);
 
       // ==================== BACK WALL: STUDENT LOCKERS (교실 뒷편 사물함) ====================
       const lockerGroup = new THREE.Group();
@@ -1239,7 +1394,7 @@
 
       threeRenderer.domElement.addEventListener('wheel', (e) => {
         e.preventDefault();
-        adjustCameraZoom(e.deltaY * 0.008);
+        adjustCameraZoom(e.deltaY * 0.012);
       }, { passive: false });
 
       window.addEventListener('keydown', (e) => {
@@ -1353,6 +1508,22 @@
       const torso = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.48, 0.26), shirtMat);
       torso.position.y = 0.66;
       bodyPivot.add(torso);
+
+      // Schoolbag (가방): worn on back (-Z) when standing, hung on chair back when sitting
+      const bagGroup = new THREE.Group();
+      bagGroup.name = 'schoolBag';
+      const bagMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a });
+      const bagPocketMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+      const bagMain = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.42, 0.16), bagMat);
+      const bagPocket = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.05), bagPocketMat);
+      bagPocket.position.set(0, -0.06, -0.09);
+      const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.36, 0.18), bagMat);
+      strapL.position.set(-0.14, 0.02, 0.04);
+      const strapR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.36, 0.18), bagMat);
+      strapR.position.set(0.14, 0.02, 0.04);
+      bagGroup.add(bagMain, bagPocket, strapL, strapR);
+      bagGroup.position.set(0, 0.68, -0.21);
+      bodyPivot.add(bagGroup);
 
       // White front jersey stripe (gives clear front vs back visual distinction!)
       const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.46, 0.02), shoeMat);
@@ -1489,14 +1660,25 @@
       const bodyPivot = rootGroup.getObjectByName('bodyPivot');
       const leftLeg = rootGroup.getObjectByName('leftLeg');
       const rightLeg = rootGroup.getObjectByName('rightLeg');
+      const bag = rootGroup.getObjectByName('schoolBag');
       if (isSitting) {
         if (bodyPivot) bodyPivot.position.y = -0.14;
         if (leftLeg) leftLeg.rotation.x = -Math.PI / 2.1;
         if (rightLeg) rightLeg.rotation.x = -Math.PI / 2.1;
+        // Hang bag on the back of the chair instead of wearing on back
+        if (bag) {
+          bag.position.set(0, 0.56, -0.36);
+          bag.scale.set(0.85, 0.85, 0.85);
+        }
       } else {
         if (bodyPivot) bodyPivot.position.y = 0;
         if (leftLeg) leftLeg.rotation.x = 0;
         if (rightLeg) rightLeg.rotation.x = 0;
+        // Wear bag on back when standing/walking
+        if (bag) {
+          bag.position.set(0, 0.68, -0.21);
+          bag.scale.set(1, 1, 1);
+        }
       }
     }
 
@@ -1545,7 +1727,7 @@
         st.z += 0.35;
         group.position.z = st.z;
         apply3DSitPose(group, false);
-        showToast(`${st.name} 캐릭터가 자리에서 일어났습니다.`);
+        showToast(`${st.name} 캐릭터가 일어나 가방을 멨습니다.`);
       } else {
         let nearest = null, minDist = 999;
         chairPositions.forEach(c => {
@@ -1562,7 +1744,7 @@
           const bodyPivot = group.getObjectByName('bodyPivot');
           if (bodyPivot) bodyPivot.rotation.y = Math.PI;
           apply3DSitPose(group, true);
-          showToast(`${nearest.seatNum}번 의자에 앉았습니다.`);
+          showToast(`${nearest.seatNum}번 의자에 앉고 가방을 걸었습니다.`);
         } else {
           showToast('책상 의자 근처로 이동 후 앉기(E)를 눌러주세요.');
         }
@@ -1778,6 +1960,7 @@
         asset.price = Math.max(50, Math.round(asset.price * (1 + rate + (Math.random() - 0.5) * 0.02)));
       });
       addLog(`[Day ${cls.dayCount} 아침 뉴스] ${news.title}`);
+      refreshClassroomTV();
       saveState();
       renderAll();
       showToast(`Day ${cls.dayCount} 새로운 아침 뉴스가 도착했습니다!`);
